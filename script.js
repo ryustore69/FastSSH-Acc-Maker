@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 });
 
 // ✅ Fungsi mengirim request ke server dengan alternatif CORS
-async function sendRequest(requestData) {
+/* async function sendRequest(requestData) {
     try {
         const proxyUrl = "https://api.allorigins.win/raw?url=";
         const targetUrl = "https://www.fastssh.com/page/create-obfs-process";
@@ -84,8 +84,46 @@ async function sendRequest(requestData) {
         alert("Terjadi kesalahan saat menghubungi server: " + error.message);
         document.getElementById("responseBox").value = `Terjadi kesalahan: ${error.message}`;
     }
-}
+} */
 
+    async function sendRequest(requestData) {
+        try {
+            const proxyUrl = "https://corsproxy.io/?";
+            const targetUrl = "https://www.fastssh.com/page/create-obfs-process";
+            
+            const formData = new FormData();
+            formData.append("serverid", requestData.serverid);
+            formData.append("ssid", requestData.ssid);
+            formData.append("username", requestData.username);
+            formData.append("sni_bug", requestData.sni_bug);
+            formData.append("protocol", requestData.protocol);
+            formData.append("captcha", requestData.captcha);
+    
+            const response = await fetch(proxyUrl + encodeURIComponent(targetUrl), {
+                method: "POST",
+                body: formData
+            });
+    
+            const text = await response.text();
+            console.log("✅ Raw Response:", text);
+    
+            try {
+                const result = JSON.parse(text);
+                document.getElementById("responseBox").value = JSON.stringify(result, null, 2);
+                processAccountData(result);
+            } catch (e) {
+                console.warn("⚠️ Response bukan JSON, menampilkan raw response...");
+                document.getElementById("responseBox").value = text;
+            }
+    
+            grecaptcha.reset();
+        } catch (error) {
+            console.error("❌ Error:", error);
+            alert("Terjadi kesalahan: " + error.message);
+            document.getElementById("responseBox").value = `Terjadi kesalahan: ${error.message}`;
+        }
+    }    
+    
 // ✅ Fungsi parsing akun VPN dari respons HTML
 function processAccountData(responseData) {
     const accountData = {
