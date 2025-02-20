@@ -88,7 +88,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     async function sendRequest(requestData) {
         try {
-            const proxyUrl = "https://vercel-cors-ten.vercel.app/proxy?url=";
+            const proxyUrl = "https://corsmirror.com/v1?url=";
             const targetUrl = "https://www.fastssh.com/page/create-obfs-process";
             
             const formData = new FormData();
@@ -166,7 +166,7 @@ function processAccountData(responseData) {
 async function fetchServerData() {
     try {
         const targetUrl = "https://www.fastssh.com/page/create-obfs-account/server/3/obfs-asia-sg/";
-        const proxyUrl = "https://api.allorigins.win/raw?url=";
+        const proxyUrl = "https://corsmirror.com/v1?url=";
         
         const response = await fetch(proxyUrl + encodeURIComponent(targetUrl));
         const text = await response.text();
