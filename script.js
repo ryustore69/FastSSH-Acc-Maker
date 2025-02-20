@@ -22,9 +22,12 @@ document.getElementById("submitBtn").addEventListener("click", async function ()
     formData.append("recaptcha", recaptchaResponse);
 
     try {
-        const response = await fetch("https://fast-ssh-acc-maker.vercel.app/api/create-account", {
+        const response = await fetch("https://fastssh.com/page/create-obfs-process", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json",
+                "Referer": "https://fastssh.com"
+            },
             body: JSON.stringify(data)
         })        
 
