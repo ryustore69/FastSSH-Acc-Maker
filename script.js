@@ -1,4 +1,9 @@
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
+    console.log("🚀 Script Loaded");
+
+    // 🔹 Coba ambil serverid & ssid jika tidak ada
+    await fetchServerData();
+
     document.getElementById("submitBtn").addEventListener("click", async function (event) {
         event.preventDefault(); // Mencegah refresh halaman
 
@@ -16,12 +21,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // ✅ Validasi input, pastikan semua kolom diisi
         if (!serverid || !ssid || !username || !sni_bug || !protocol) {
-            alert("Harap isi semua kolom!");
+            alert("❌ Harap isi semua kolom!");
             return;
         }
 
         if (!captcha) {
-            alert("Harap selesaikan reCAPTCHA!");
+            alert("⚠️ Harap selesaikan reCAPTCHA!");
             return;
         }
 
@@ -46,7 +51,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             const text = await response.text();
-            console.log("Raw Response:", text);
+            console.log("✅ Raw Response:", text);
 
             // ✅ Coba parse JSON jika memungkinkan, jika gagal tampilkan raw response
             let result;
@@ -55,33 +60,33 @@ document.addEventListener("DOMContentLoaded", function () {
                 responseBox.value = JSON.stringify(result, null, 2);
                 processAccountData(text);
             } catch (e) {
-                console.warn("Response is not JSON, displaying raw response...");
+                console.warn("⚠️ Response is not JSON, displaying raw response...");
                 responseBox.value = text;
             }
 
             grecaptcha.reset(); // ✅ Reset reCAPTCHA setelah sukses
         } catch (error) {
-            console.error("Error:", error);
+            console.error("❌ Error:", error);
             alert("Terjadi kesalahan saat menghubungi server: " + error.message);
             responseBox.value = `Terjadi kesalahan: ${error.message}`;
         }
     });
 });
 
-// ✅ Fungsi untuk parsing akun VLESS dari respons HTML
+// ✅ Fungsi untuk parsing akun VPN dari respons HTML
 function processAccountData(responseText) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(responseText, "text/html");
     const reportDiv = doc.getElementById("report");
 
     if (!reportDiv) {
-        console.error("Elemen report tidak ditemukan dalam respons.");
+        console.error("❌ Elemen report tidak ditemukan dalam respons.");
         return;
     }
 
     const accountData = {
         status: "success",
-        message: "Account has been successfully created",
+        message: "✅ Akun berhasil dibuat",
         validity: "7 days",
         accounts: []
     };
@@ -107,6 +112,30 @@ function processAccountData(responseText) {
         }
     }
 
-    console.log("Parsed Account Data:", accountData);
+    console.log("✅ Parsed Account Data:", accountData);
     document.getElementById("responseBox").value = JSON.stringify(accountData, null, 2);
+}
+
+// ✅ Fungsi untuk mengambil `serverid` dan `ssid` jika belum ada
+async function fetchServerData() {
+    try {
+        const response = await fetch("https://www.fastssh.com/");
+        const text = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(text, "text/html");
+
+        const serveridInput = document.getElementById("serverid");
+        const ssidInput = document.getElementById("ssid");
+
+        if (serveridInput) {
+            serveridInput.value = doc.querySelector("input[name='serverid']")?.value || "";
+        }
+        if (ssidInput) {
+            ssidInput.value = doc.querySelector("input[name='ssid']")?.value || "";
+        }
+
+        console.log("✅ Server ID & SSID berhasil diambil.");
+    } catch (error) {
+        console.error("❌ Gagal mendapatkan serverid atau ssid:", error);
+    }
 }
