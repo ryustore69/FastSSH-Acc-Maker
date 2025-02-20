@@ -1,105 +1,94 @@
 document.addEventListener("DOMContentLoaded", async function () {
     console.log("🚀 Script Loaded");
 
-    // 🔹 Coba ambil serverid & ssid jika tidak ada
+    // 🔹 Ambil serverid & ssid jika tidak ada
     await fetchServerData();
 
     document.getElementById("submitBtn").addEventListener("click", async function (event) {
         event.preventDefault(); // Mencegah refresh halaman
-    
-        // ✅ Cek apakah elemen ditemukan
+
+        // ✅ Ambil elemen input
         const serveridInput = document.getElementById("serverid");
         const ssidInput = document.getElementById("ssid");
-    
-        if (!serveridInput || !ssidInput) {
-            alert("❌ Input serverid atau ssid tidak ditemukan di halaman.");
+        const usernameInput = document.getElementById("username");
+        const sniInput = document.getElementById("sni");
+        const protocolInput = document.getElementById("protocol");
+        const responseBox = document.getElementById("responseBox");
+
+        // ✅ Validasi elemen
+        if (!serveridInput || !ssidInput || !usernameInput || !sniInput || !protocolInput) {
+            alert("❌ Input tidak lengkap! Pastikan semua elemen ditemukan.");
             return;
         }
-    
-        // ✅ Debugging: Cek apakah value sudah terisi
-        console.log("🔍 Server ID:", serveridInput.value);
-        console.log("🔍 SSID:", ssidInput.value);
-    
+
+        // ✅ Ambil nilai dari input
         const serverid = serveridInput.value.trim();
         const ssid = ssidInput.value.trim();
-        const username = document.getElementById("username").value.trim();
-        const sni_bug = document.getElementById("sni").value.trim();
-        const protocol = document.getElementById("protocol").value;
+        const username = usernameInput.value.trim();
+        const sni_bug = sniInput.value.trim();
+        const protocol = protocolInput.value;
         const captcha = grecaptcha.getResponse();
-        const responseBox = document.getElementById("responseBox");
-    
-        // ✅ Validasi input
+
+        // ✅ Validasi input sebelum request
         if (!serverid || !ssid || !username || !sni_bug || !protocol) {
-            alert("❌ Harap isi semua kolom! Cek apakah semua data telah diisi.");
+            alert("❌ Harap isi semua kolom!");
             return;
         }
-    
+
         if (!captcha) {
             alert("⚠️ Harap selesaikan reCAPTCHA!");
             return;
         }
-    
-        // ✅ Debugging sebelum mengirim request
+
         console.log("🟢 Semua data valid, siap dikirim:", { serverid, ssid, username, sni_bug, protocol, captcha });
-    
-        // ✅ Kirim data
-        sendRequest({ serverid, ssid, username, sni_bug, protocol, captcha });
-        });    
 
-        // ✅ Kirim data dengan serverid dan ssid
-        const requestData = { serverid, username, sni_bug, protocol, ssid, captcha };
-
-        try {
-            // ✅ Gunakan proxy untuk menghindari CORS
-            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent("https://www.fastssh.com/page/create-obfs-process")}`;
-
-            const response = await fetch(proxyUrl, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "User-Agent": navigator.userAgent
-                },
-                body: JSON.stringify(requestData),
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-
-            const text = await response.text();
-            console.log("✅ Raw Response:", text);
-
-            // ✅ Coba parse JSON jika memungkinkan, jika gagal tampilkan raw response
-            let result;
-            try {
-                result = JSON.parse(text);
-                responseBox.value = JSON.stringify(result, null, 2);
-                processAccountData(text);
-            } catch (e) {
-                console.warn("⚠️ Response is not JSON, displaying raw response...");
-                responseBox.value = text;
-            }
-
-            grecaptcha.reset(); // ✅ Reset reCAPTCHA setelah sukses
-        } catch (error) {
-            console.error("❌ Error:", error);
-            alert("Terjadi kesalahan saat menghubungi server: " + error.message);
-            responseBox.value = `Terjadi kesalahan: ${error.message}`;
-        }
+        // ✅ Kirim request
+        await sendRequest({ serverid, ssid, username, sni_bug, protocol, captcha });
     });
 });
 
-// ✅ Fungsi untuk parsing akun VPN dari respons HTML
-function processAccountData(responseText) {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(responseText, "text/html");
-    const reportDiv = doc.getElementById("report");
+// ✅ Fungsi mengirim request ke server
+async function sendRequest(requestData) {
+    try {
+        // Gunakan proxy untuk menghindari CORS
+        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent("https://www.fastssh.com/page/create-obfs-process")}`;
 
-    if (!reportDiv) {
-        console.error("❌ Elemen report tidak ditemukan dalam respons.");
-        return;
+        const response = await fetch(proxyUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "User-Agent": navigator.userAgent
+            },
+            body: JSON.stringify(requestData),
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const text = await response.text();
+        console.log("✅ Raw Response:", text);
+
+        // ✅ Coba parse JSON jika memungkinkan
+        try {
+            const result = JSON.parse(text);
+            document.getElementById("responseBox").value = JSON.stringify(result, null, 2);
+            processAccountData(result);
+        } catch (e) {
+            console.warn("⚠️ Response bukan JSON, menampilkan raw response...");
+            document.getElementById("responseBox").value = text;
+        }
+
+        grecaptcha.reset(); // ✅ Reset reCAPTCHA setelah sukses
+    } catch (error) {
+        console.error("❌ Error:", error);
+        alert("Terjadi kesalahan saat menghubungi server: " + error.message);
+        document.getElementById("responseBox").value = `Terjadi kesalahan: ${error.message}`;
     }
+}
 
+// ✅ Fungsi parsing akun VPN dari respons HTML
+function processAccountData(responseData) {
     const accountData = {
         status: "success",
         message: "✅ Akun berhasil dibuat",
@@ -107,23 +96,27 @@ function processAccountData(responseText) {
         accounts: []
     };
 
-    const textareas = reportDiv.getElementsByTagName("textarea");
+    if (responseData && responseData.report) {
+        const textareas = responseData.report.match(/<textarea[^>]*>(.*?)<\/textarea>/g);
 
-    for (let textarea of textareas) {
-        const value = textarea.value.trim();
-        const match = value.match(/vless:\/\/([^@]+)@([^:]+):(\d+)\?path=([^&]+)&security=([^&]+)&encryption=([^&]+)&type=([^&]+)(?:&sni=([^#]+))?#(.+)/);
+        if (textareas) {
+            textareas.forEach(textarea => {
+                const value = textarea.replace(/<textarea[^>]*>|<\/textarea>/g, "").trim();
+                const match = value.match(/vless:\/\/([^@]+)@([^:]+):(\d+)\?path=([^&]+)&security=([^&]+)&encryption=([^&]+)&type=([^&]+)(?:&sni=([^#]+))?#(.+)/);
 
-        if (match) {
-            accountData.accounts.push({
-                uuid: match[1],
-                server: match[2],
-                port: match[3],
-                path: decodeURIComponent(match[4]),
-                security: match[5],
-                encryption: match[6],
-                type: match[7],
-                sni: match[8] || "None",
-                description: match[9]
+                if (match) {
+                    accountData.accounts.push({
+                        uuid: match[1],
+                        server: match[2],
+                        port: match[3],
+                        path: decodeURIComponent(match[4]),
+                        security: match[5],
+                        encryption: match[6],
+                        type: match[7],
+                        sni: match[8] || "None",
+                        description: match[9]
+                    });
+                }
             });
         }
     }
@@ -132,7 +125,7 @@ function processAccountData(responseText) {
     document.getElementById("responseBox").value = JSON.stringify(accountData, null, 2);
 }
 
-// ✅ Fungsi untuk mengambil `serverid` dan `ssid` jika belum ada
+// ✅ Fungsi mengambil `serverid` dan `ssid` jika belum ada
 async function fetchServerData() {
     try {
         const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent("https://www.fastssh.com/")}`;
@@ -141,7 +134,7 @@ async function fetchServerData() {
         const parser = new DOMParser();
         const doc = parser.parseFromString(text, "text/html");
 
-        // Pastikan elemen ditemukan
+        // ✅ Pastikan elemen ditemukan
         const serveridElem = document.getElementById("serverid");
         const ssidElem = document.getElementById("ssid");
 
@@ -150,15 +143,15 @@ async function fetchServerData() {
             return;
         }
 
-        // Ambil nilai dari halaman yang di-fetch
+        // ✅ Ambil nilai dari halaman
         const fetchedServerid = doc.querySelector("input[name='serverid']")?.value || "";
         const fetchedSsid = doc.querySelector("input[name='ssid']")?.value || "";
 
-        // Debugging nilai yang diambil
+        // ✅ Debugging nilai yang diambil
         console.log("🔍 Server ID dari halaman:", fetchedServerid);
         console.log("🔍 SSID dari halaman:", fetchedSsid);
 
-        // Masukkan ke input di halaman
+        // ✅ Masukkan ke input di halaman
         serveridElem.value = fetchedServerid;
         ssidElem.value = fetchedSsid;
 
