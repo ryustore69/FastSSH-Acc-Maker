@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buat Akun VPN</title>
+    <link rel="stylesheet" href="style.css">
+
+    <!-- reCAPTCHA API -->
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+</head>
+<body>
+    <div class="container">
+        <h2>Buat Akun VPN</h2>
+        <form id="vpnForm">
+            <label>Username:</label>
+            <input type="text" id="username" required>
+
+            <label>SNI/Bug Host:</label>
+            <input type="text" id="sni" required>
+
+            <label>Protocol:</label>
+            <select id="protocol" required>
+                <option value="">Pilih Protocol</option>
+                <option value="VLESS+WS+TLS">VLESS + WS + TLS / No TLS</option>
+                <option value="VLESS+TCP+TLS">VLESS + TCP + TLS / No TLS</option>
+                <option value="VLESS+H2+TLS">VLESS + H2 + TLS</option>
+                <option value="VLESS+gRPC+TLS">VLESS + gRPC + TLS</option>
+                <option value="VLESS+XTLS">VLESS + XTLS</option>
+                <option value="VMESS+WS+TLS">VMESS + WS + TLS / No TLS</option>
+                <option value="VMESS+TCP+TLS">VMESS + TCP + TLS / No TLS</option>
+                <option value="VMESS+H2+TLS">VMESS + H2 + TLS</option>
+                <option value="VMESS+gRPC+TLS">VMESS + gRPC + TLS</option>
+                <option value="TROJAN+WS+TLS">TROJAN + WS + TLS (GO)</option>
+                <option value="TROJAN+TCP+TLS">TROJAN + TCP + TLS (GFW)</option>
+                <option value="TROJAN+gRPC+TLS">TROJAN + gRPC + TLS</option>
+                <option value="TROJAN+H2+TLS">TROJAN + H2 + TLS</option>
+            </select>
+
+            <div class="g-recaptcha" data-sitekey="6LcpDQ8UAAAAAGcJOV1eC9WuOM6meGgn5-rVINkC"></div>
+
+            <button type="button" id="submitBtn">Buat Akun</button>
+        </form>
+    </div>
+
+    <div id="result"></div>
+
+    <script src="script.js"></script>
+    <script>
+        window.onload = function() {
+            if (typeof grecaptcha === "undefined") {
+                console.warn("reCAPTCHA gagal dimuat, mencoba memuat ulang...");
+                const script = document.createElement("script");
+                script.src = "https://www.google.com/recaptcha/api.js?render=6LcpDQ8UAAAAAGcJOV1eC9WuOM6meGgn5-rVINkC";
+                script.onload = () => console.log("reCAPTCHA berhasil dimuat ulang.");
+                document.head.appendChild(script);
+            } else {
+                console.log("reCAPTCHA berhasil dimuat.");
+            }
+        };
+    </script>
+</body>
+</html>
