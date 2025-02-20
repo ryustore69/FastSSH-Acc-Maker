@@ -6,29 +6,45 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     document.getElementById("submitBtn").addEventListener("click", async function (event) {
         event.preventDefault(); // Mencegah refresh halaman
-
-        // ✅ Ambil elemen dan pastikan mereka ada sebelum mengambil value
+    
+        // ✅ Cek apakah elemen ditemukan
         const serveridInput = document.getElementById("serverid");
         const ssidInput = document.getElementById("ssid");
-
-        const serverid = serveridInput ? serveridInput.value.trim() : "";
-        const ssid = ssidInput ? ssidInput.value.trim() : "";
+    
+        if (!serveridInput || !ssidInput) {
+            alert("❌ Input serverid atau ssid tidak ditemukan di halaman.");
+            return;
+        }
+    
+        // ✅ Debugging: Cek apakah value sudah terisi
+        console.log("🔍 Server ID:", serveridInput.value);
+        console.log("🔍 SSID:", ssidInput.value);
+    
+        const serverid = serveridInput.value.trim();
+        const ssid = ssidInput.value.trim();
         const username = document.getElementById("username").value.trim();
         const sni_bug = document.getElementById("sni").value.trim();
         const protocol = document.getElementById("protocol").value;
         const captcha = grecaptcha.getResponse();
         const responseBox = document.getElementById("responseBox");
-
-        // ✅ Validasi input, pastikan semua kolom diisi
+    
+        // ✅ Validasi input
         if (!serverid || !ssid || !username || !sni_bug || !protocol) {
-            alert("❌ Harap isi semua kolom!");
+            alert("❌ Harap isi semua kolom! Cek apakah semua data telah diisi.");
             return;
         }
-
+    
         if (!captcha) {
             alert("⚠️ Harap selesaikan reCAPTCHA!");
             return;
         }
+    
+        // ✅ Debugging sebelum mengirim request
+        console.log("🟢 Semua data valid, siap dikirim:", { serverid, ssid, username, sni_bug, protocol, captcha });
+    
+        // ✅ Kirim data
+        sendRequest({ serverid, ssid, username, sni_bug, protocol, captcha });
+        });    
 
         // ✅ Kirim data dengan serverid dan ssid
         const requestData = { serverid, username, sni_bug, protocol, ssid, captcha };
@@ -120,23 +136,33 @@ function processAccountData(responseText) {
 async function fetchServerData() {
     try {
         const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent("https://www.fastssh.com/")}`;
-
         const response = await fetch(proxyUrl);
         const text = await response.text();
         const parser = new DOMParser();
         const doc = parser.parseFromString(text, "text/html");
 
-        const serveridInput = document.getElementById("serverid");
-        const ssidInput = document.getElementById("ssid");
+        // Pastikan elemen ditemukan
+        const serveridElem = document.getElementById("serverid");
+        const ssidElem = document.getElementById("ssid");
 
-        if (serveridInput) {
-            serveridInput.value = doc.querySelector("input[name='serverid']")?.value || "";
-        }
-        if (ssidInput) {
-            ssidInput.value = doc.querySelector("input[name='ssid']")?.value || "";
+        if (!serveridElem || !ssidElem) {
+            console.error("❌ Elemen serverid atau ssid tidak ditemukan!");
+            return;
         }
 
-        console.log("✅ Server ID & SSID berhasil diambil.");
+        // Ambil nilai dari halaman yang di-fetch
+        const fetchedServerid = doc.querySelector("input[name='serverid']")?.value || "";
+        const fetchedSsid = doc.querySelector("input[name='ssid']")?.value || "";
+
+        // Debugging nilai yang diambil
+        console.log("🔍 Server ID dari halaman:", fetchedServerid);
+        console.log("🔍 SSID dari halaman:", fetchedSsid);
+
+        // Masukkan ke input di halaman
+        serveridElem.value = fetchedServerid;
+        ssidElem.value = fetchedSsid;
+
+        console.log("✅ Server ID & SSID berhasil dimasukkan ke input.");
     } catch (error) {
         console.error("❌ Gagal mendapatkan serverid atau ssid:", error);
     }

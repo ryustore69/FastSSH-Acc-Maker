@@ -14,7 +14,7 @@
 <body>
     <div class="container">
         <h2>Buat Akun VPN</h2>
-        <form id="vpnForm" onsubmit="return false;">
+        <form id="vpnForm">
             <label for="username">Username:</label>
             <input type="text" id="username" name="username" placeholder="Masukkan username" required autocomplete="off">
 
@@ -38,6 +38,10 @@
                 <option value="TROJAN+gRPC+TLS">TROJAN + gRPC + TLS</option>
                 <option value="TROJAN+H2+TLS">TROJAN + H2 + TLS</option>
             </select>
+
+            <!-- Tambahkan input hidden untuk serverid dan ssid -->
+            <input type="hidden" id="serverid" name="serverid">
+            <input type="hidden" id="ssid" name="ssid">
 
             <!-- reCAPTCHA -->
             <div class="g-recaptcha" data-sitekey="6Lcvb90qAAAAAEv9mSpdybOYbTDtLIICSq5tTQex" data-callback="onCaptchaSuccess"></div>
