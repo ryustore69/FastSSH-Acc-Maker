@@ -18,7 +18,7 @@ document.getElementById("submitBtn").addEventListener("click", async function ()
     const formData = { username, sni, protocol, recaptcha: recaptchaResponse };
 
     try {
-        const response = await fetch("https://cors-anywhere-0.glitch.me/fast-sth-acc-maker.vercel.app/create-account", {
+        const response = await fetch("https://cors-anywhere-0.glitch.me/fastssh.com/page/create-obfs-process", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(formData)
