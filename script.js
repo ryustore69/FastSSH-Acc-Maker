@@ -18,7 +18,7 @@ document.getElementById("submitBtn").addEventListener("click", async function ()
     const requestData = { username, sni, protocol, recaptcha: recaptchaResponse };
 
     try {
-        const response = await fetch("https://www.fastssh.com/page/create-obfs-process", { // Change this!
+        const response = await fetch("https://cors-anywhere-0.glitch.me/www.fastssh.com/page/create-obfs-process", { // Change this!
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(requestData)
