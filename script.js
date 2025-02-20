@@ -88,7 +88,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     async function sendRequest(requestData) {
         try {
-            const proxyUrl = "https://api.codetabs.com/v1/proxy/?quest=";
+            const proxyUrl = "https://sparkling-limit-b5ca.corspass.workers.dev/";
             const targetUrl = "https://www.fastssh.com/page/create-obfs-process";
             
             const formData = new FormData();
