@@ -12,9 +12,33 @@ document.addEventListener("DOMContentLoaded", async function () {
         const ssid = document.getElementById("ssid").value.trim();
         const username = document.getElementById("username").value.trim();
         const sni_bug = document.getElementById("sni").value.trim();
-        const protocol = document.getElementById("protocol").value;
+        let protocol = document.getElementById("protocol").value;
         const captcha = grecaptcha.getResponse();
         const responseBox = document.getElementById("responseBox");
+
+        // ✅ Konversi nama `protocol` ke format yang diterima FastSSH
+        const protocolMapping = {
+            "vless-ws": "VLESS-WS",
+            "vless-tcp": "VLESS-TCP",
+            "vless-h2": "VLESS-H2",
+            "vless-grpc": "VLESS-GRPC",
+            "vless-tcp-xtls": "VLESS-TCP-XTLS",
+            "vmess-ws": "VMESS-WS",
+            "vmess-tcp": "VMESS-TCP",
+            "vmess-h2": "VMESS-H2",
+            "vmess-grpc": "VMESS-GRPC",
+            "trojan-ws": "TROJAN-WS",
+            "trojan-tcp": "TROJAN-TCP",
+            "trojan-grpc": "TROJAN-GRPC",
+            "trojan-h2": "TROJAN-H2"
+        };
+
+        if (protocolMapping[protocol]) {
+            protocol = protocolMapping[protocol]; // Konversi ke format FastSSH
+        } else {
+            alert("❌ Format protocol tidak valid! Cek kembali pilihan protocol.");
+            return;
+        }
 
         // ✅ Validasi input sebelum request
         if (!serverid || !ssid || !username || !sni_bug || !protocol) {
@@ -45,7 +69,7 @@ async function sendRequest(requestData) {
         formData.append("ssid", requestData.ssid);
         formData.append("username", requestData.username);
         formData.append("sni", requestData.sni_bug); // Gunakan key "sni" bukan "sni_bug"
-        formData.append("protocol", requestData.protocol.toLowerCase()); // Perbaikan format protocol
+        formData.append("protocol", requestData.protocol); // Kirim protocol yang telah diperbaiki
         formData.append("captcha", requestData.captcha);
 
         const response = await fetch(proxyUrl + encodeURIComponent(targetUrl), {
@@ -54,7 +78,7 @@ async function sendRequest(requestData) {
         });
 
         const text = await response.text();
-        console.log("✅ Raw Response:", text);
+        console.log("✅ Raw Response dari Server:", text);
 
         // ✅ Parsing data akun dari HTML response
         processAccountData(text);
@@ -108,38 +132,4 @@ function processAccountData(responseText) {
 
     console.log("✅ Parsed Account Data:", accountData);
     document.getElementById("responseBox").value = JSON.stringify(accountData, null, 2);
-}
-
-// ✅ Fungsi mengambil `serverid` dan `ssid`
-async function fetchServerData() {
-    try {
-        const targetUrl = "https://www.fastssh.com/page/create-obfs-account/server/3/obfs-asia-sg/";
-        const proxyUrl = "https://corsmirror.com/v1?url=";
-
-        const response = await fetch(proxyUrl + encodeURIComponent(targetUrl));
-        const text = await response.text();
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(text, "text/html");
-
-        // ✅ Pastikan elemen ditemukan
-        const serveridElem = document.getElementById("serverid");
-        const ssidElem = document.getElementById("ssid");
-
-        if (!serveridElem || !ssidElem) {
-            console.error("❌ Elemen serverid atau ssid tidak ditemukan di halaman!");
-            return;
-        }
-
-        // ✅ Ambil nilai dari halaman yang di-fetch
-        const fetchedServerid = doc.querySelector("input[name='serverid']")?.value || "";
-        const fetchedSsid = doc.querySelector("input[name='ssid']")?.value || "";
-
-        // ✅ Masukkan ke input di halaman
-        serveridElem.value = fetchedServerid;
-        ssidElem.value = fetchedSsid;
-
-        console.log("✅ Server ID & SSID berhasil dimasukkan ke input.");
-    } catch (error) {
-        console.error("❌ Gagal mendapatkan serverid atau ssid:", error);
-    }
 }
