@@ -42,15 +42,18 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         console.log("🟢 Semua data valid, siap dikirim:", { serverid, ssid, username, sni_bug, protocol, captcha });
 
-        // ✅ Kirim request
+        // ✅ Kirim request menggunakan proxy untuk menghindari CORS
         await sendRequest({ serverid, ssid, username, sni_bug, protocol, captcha });
     });
 });
 
-// ✅ Fungsi mengirim request ke server
+// ✅ Fungsi mengirim request ke server dengan alternatif CORS
 async function sendRequest(requestData) {
     try {
-        const response = await fetch("https://www.fastssh.com/page/create-obfs-process", {
+        const proxyUrl = "https://api.allorigins.win/raw?url=";
+        const targetUrl = "https://www.fastssh.com/page/create-obfs-process";
+        
+        const response = await fetch(proxyUrl + encodeURIComponent(targetUrl), {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -121,11 +124,13 @@ function processAccountData(responseData) {
     document.getElementById("responseBox").value = JSON.stringify(accountData, null, 2);
 }
 
-// ✅ Fungsi mengambil `serverid` dan `ssid`
+// ✅ Fungsi mengambil `serverid` dan `ssid` dengan alternatif API
 async function fetchServerData() {
     try {
         const targetUrl = "https://www.fastssh.com/page/create-obfs-account/server/3/obfs-asia-sg/";
-        const response = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`);
+        const proxyUrl = "https://api.allorigins.win/raw?url=";
+        
+        const response = await fetch(proxyUrl + encodeURIComponent(targetUrl));
         const text = await response.text();
         const parser = new DOMParser();
         const doc = parser.parseFromString(text, "text/html");
