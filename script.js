@@ -18,11 +18,19 @@ document.getElementById("submitBtn").addEventListener("click", async function ()
     const requestData = { username, sni, protocol, recaptcha: recaptchaResponse };
 
     try {
-        const response = await fetch("https://corsproxy.io/?https://www.fastssh.com/page/create-obfs-process", { // Change this!
+        const response = await fetch("https://www.fastssh.com/page/create-obfs-process", { // Change this!
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(requestData)
-        });
+            headers: {
+                "Content-Type": "application/json",
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36",
+                "Referer": "https://www.fastssh.com/",
+                "Origin": "https://www.fastssh.com/"
+            },
+            body: JSON.stringify
+            })
+            .then(res => res.text())
+            .then(data => console.log(data))
+            .catch(error => console.error("Error:", error));
 
         const text = await response.text();
         console.log("Raw Response:", text);
