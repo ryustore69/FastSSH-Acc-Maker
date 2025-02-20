@@ -7,19 +7,19 @@
     <link rel="stylesheet" href="style.css">
 
     <!-- reCAPTCHA API -->
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script src="https://www.google.com/recaptcha/api.js?render=YOUR_SITE_KEY" async defer></script>
 </head>
 <body>
     <div class="container">
         <h2>Buat Akun VPN</h2>
         <form id="vpnForm">
-            <label>Username:</label>
+            <label for="username">Username:</label>
             <input type="text" id="username" required>
 
-            <label>SNI/Bug Host:</label>
+            <label for="sni">SNI/Bug Host:</label>
             <input type="text" id="sni" required>
 
-            <label>Protocol:</label>
+            <label for="protocol">Protocol:</label>
             <select id="protocol" required>
                 <option value="">Pilih Protocol</option>
                 <option value="VLESS+WS+TLS">VLESS + WS + TLS / No TLS</option>
@@ -37,8 +37,6 @@
                 <option value="TROJAN+H2+TLS">TROJAN + H2 + TLS</option>
             </select>
 
-            <div class="g-recaptcha" data-sitekey="6LcpDQ8UAAAAAGcJOV1eC9WuOM6meGgn5-rVINkC"></div>
-
             <button type="button" id="submitBtn">Buat Akun</button>
         </form>
     </div>
@@ -46,18 +44,5 @@
     <div id="result"></div>
 
     <script src="script.js"></script>
-    <script>
-        window.onload = function() {
-            if (typeof grecaptcha === "undefined") {
-                console.warn("reCAPTCHA gagal dimuat, mencoba memuat ulang...");
-                const script = document.createElement("script");
-                script.src = "https://www.google.com/recaptcha/api.js?render=6LcpDQ8UAAAAAGcJOV1eC9WuOM6meGgn5-rVINkC";
-                script.onload = () => console.log("reCAPTCHA berhasil dimuat ulang.");
-                document.head.appendChild(script);
-            } else {
-                console.log("reCAPTCHA berhasil dimuat.");
-            }
-        };
-    </script>
 </body>
 </html>
