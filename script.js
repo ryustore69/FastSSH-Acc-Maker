@@ -1,24 +1,27 @@
 document.getElementById("submitBtn").addEventListener("click", async function () {
+    const serverid = document.getElementById("serverid").value.trim();
     const username = document.getElementById("username").value.trim();
-    const sni = document.getElementById("sni").value.trim();
+    const sni_bug = document.getElementById("sni").value.trim();
     const protocol = document.getElementById("protocol").value;
-    const recaptchaResponse = grecaptcha.getResponse();
+    const ssid = document.getElementById("ssid").value.trim();
+    const captcha = grecaptcha.getResponse();
     const responseBox = document.getElementById("responseBox");
 
     // Validasi input
-    if (!username || !sni || !protocol) {
+    if (!serverid || !username || !sni_bug || !protocol || !ssid) {
         alert("Harap isi semua kolom!");
         return;
     }
 
-    if (!recaptchaResponse) {
+    if (!captcha) {
         alert("Harap selesaikan reCAPTCHA!");
         return;
     }
 
-    const requestData = { username, sni, protocol, recaptcha: recaptchaResponse };
+    const requestData = { serverid, username, sni_bug, protocol, ssid, captcha };
 
     try {
+        // Kirim request untuk membuat akun
         const response = await fetch("https://api.allorigins.win/raw?url=https://www.fastssh.com/page/create-obfs-process", {
             method: "POST",
             headers: {
@@ -30,7 +33,6 @@ document.getElementById("submitBtn").addEventListener("click", async function ()
             body: JSON.stringify(requestData),
         });
 
-        // Periksa apakah respons sukses
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
