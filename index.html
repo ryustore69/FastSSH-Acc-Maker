@@ -24,7 +24,7 @@
 
             <label for="protocol">Protocol:</label>
             <select id="protocol" name="protocol" required>
-                <option value="">Pilih Protocol</option>
+                <option value="" disabled>Pilih Protocol</option>
                 <optgroup label="VLESS">
                     <option value="vless-ws">VLESS + WS + TLS / No TLS</option>
                     <option value="vless-tcp">VLESS + TCP + TLS / No TLS</option>
@@ -46,7 +46,6 @@
                 </optgroup>
             </select>
 
-
             <!-- Input Hidden untuk serverid dan ssid -->
             <input type="hidden" id="serverid" name="serverid">
             <input type="hidden" id="ssid" name="ssid">
@@ -63,6 +62,33 @@
 
     <div id="result"></div>
 
-    <script src="script.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const protocolSelect = document.getElementById("protocol");
+
+            // Pilih opsi pertama dalam grup hanya jika pengguna belum memilih
+            if (!protocolSelect.value) {
+                protocolSelect.value = protocolSelect.querySelector("optgroup option").value;
+            }
+
+            document.getElementById("submitBtn").addEventListener("click", function (event) {
+                event.preventDefault();
+                const protocol = protocolSelect.value;
+
+                if (!protocol) {
+                    alert("Silakan pilih protokol sebelum mengirim.");
+                    return;
+                }
+
+                console.log("Nilai protocol sebelum dikirim:", protocol);
+                document.getElementById("responseBox").value = "Protocol yang dipilih: " + protocol;
+            });
+
+            // Memastikan nilai tetap setelah pengguna memilih
+            protocolSelect.addEventListener("change", function () {
+                console.log("Protocol dipilih:", protocolSelect.value);
+            });
+        });
+    </script>
 </body>
 </html>
