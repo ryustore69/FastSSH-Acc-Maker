@@ -52,12 +52,12 @@ async function sendRequest(requestData) {
     try {
         const proxyUrl = "https://corsmirror.com/v1?url=";
         const targetUrl = "https://www.fastssh.com/page/create-obfs-process";
-
+        
         const formData = new FormData();
         formData.append("serverid", requestData.serverid);
         formData.append("ssid", requestData.ssid);
         formData.append("username", requestData.username);
-        formData.append("sni", requestData.sni); // 🔹 Ubah "sni_bug" menjadi "sni" agar sesuai dengan form
+        formData.append("sni", requestData.sni);
         formData.append("protocol", requestData.protocol);
         formData.append("captcha", requestData.captcha);
 
@@ -73,6 +73,7 @@ async function sendRequest(requestData) {
         const text = await response.text();
         console.log("✅ Raw Response:", text);
 
+        // Cek jika server meminta protocol yang benar
         if (text.includes("Please choose a correct protocol")) {
             alert("❌ ERROR: Format protocol tidak valid! Cek kembali pilihan protocol.");
             return;
@@ -94,6 +95,7 @@ async function sendRequest(requestData) {
         document.getElementById("responseBox").value = `Terjadi kesalahan: ${error.message}`;
     }
 }
+
 
 // ✅ Fungsi parsing akun VPN dari respons HTML
 function processAccountData(responseData) {
