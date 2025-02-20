@@ -20,8 +20,11 @@ document.getElementById("submitBtn").addEventListener("click", async function ()
         const response = await fetch("https://cors-anywhere-0.glitch.me/fast-sth-acc-maker.vercel.app/create-account", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(formData)
-        });
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => console.log("Response:", data))
+        .catch(error => console.error("Error:", error));
 
         // Pengecekan apakah response JSON valid
         const text = await response.text();
