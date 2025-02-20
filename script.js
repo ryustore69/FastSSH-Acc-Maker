@@ -22,11 +22,11 @@ document.getElementById("submitBtn").addEventListener("click", async function ()
     formData.append("recaptcha", recaptchaResponse);
 
     try {
-        const response = await fetch("https://fastssh.com/page/create-obfs-process", {
+        const response = await fetch("https://fast-ssh-acc-maker.vercel.app/api/create-account", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data)
-        })
+        })        
 
         const text = await response.text(); // Ambil response dalam format teks
 
