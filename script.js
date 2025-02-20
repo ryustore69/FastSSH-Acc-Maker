@@ -1,65 +1,66 @@
-document.getElementById("submitBtn").addEventListener("click", async function () {
-    const serverid = document.getElementById("serverid").value.trim();
-    const username = document.getElementById("username").value.trim();
-    const sni_bug = document.getElementById("sni").value.trim();
-    const protocol = document.getElementById("protocol").value;
-    const ssid = document.getElementById("ssid").value.trim();
-    const captcha = grecaptcha.getResponse();
-    const responseBox = document.getElementById("responseBox");
+document.addEventListener("DOMContentLoaded", function () {
+    document.getElementById("submitBtn").addEventListener("click", async function (event) {
+        event.preventDefault(); // Mencegah refresh halaman
 
-    // Validasi input
-    if (!serverid || !username || !sni_bug || !protocol || !ssid) {
-        alert("Harap isi semua kolom!");
-        return;
-    }
+        const serverid = document.getElementById("serverid").value.trim();
+        const username = document.getElementById("username").value.trim();
+        const sni_bug = document.getElementById("sni").value.trim();
+        const protocol = document.getElementById("protocol").value;
+        const ssid = document.getElementById("ssid").value.trim();
+        const captcha = grecaptcha.getResponse();
+        const responseBox = document.getElementById("responseBox");
 
-    if (!captcha) {
-        alert("Harap selesaikan reCAPTCHA!");
-        return;
-    }
-
-    const requestData = { serverid, username, sni_bug, protocol, ssid, captcha };
-
-    try {
-        // Kirim request untuk membuat akun
-        const response = await fetch("https://api.allorigins.win/raw?url=https://www.fastssh.com/page/create-obfs-process", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "User-Agent": navigator.userAgent, // Ambil User-Agent dari browser
-                "Referer": "https://www.fastssh.com/",
-                "Origin": "https://www.fastssh.com/"
-            },
-            body: JSON.stringify(requestData),
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
+        // Validasi input
+        if (!serverid || !username || !sni_bug || !protocol || !ssid) {
+            alert("Harap isi semua kolom!");
+            return;
         }
 
-        const text = await response.text();
-        console.log("Raw Response:", text);
+        if (!captcha) {
+            alert("Harap selesaikan reCAPTCHA!");
+            return;
+        }
 
-        // Coba parse JSON jika memungkinkan
-        let result;
+        const requestData = { serverid, username, sni_bug, protocol, ssid, captcha };
+
         try {
-            result = JSON.parse(text);
-            responseBox.value = JSON.stringify(result, null, 2);
+            // Kirim request untuk membuat akun
+            const response = await fetch("https://api.allorigins.win/raw?url=https://www.fastssh.com/page/create-obfs-process", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "User-Agent": navigator.userAgent,
+                    "Referer": "https://www.fastssh.com/",
+                    "Origin": "https://www.fastssh.com/"
+                },
+                body: JSON.stringify(requestData),
+            });
 
-            // Jika data akun tersedia, proses untuk ditampilkan
-            processAccountData(text);
-        } catch (e) {
-            console.warn("Response is not JSON, displaying raw response...");
-            responseBox.value = text;
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const text = await response.text();
+            console.log("Raw Response:", text);
+
+            // Coba parse JSON jika memungkinkan
+            let result;
+            try {
+                result = JSON.parse(text);
+                responseBox.value = JSON.stringify(result, null, 2);
+                processAccountData(text);
+            } catch (e) {
+                console.warn("Response is not JSON, displaying raw response...");
+                responseBox.value = text;
+            }
+
+            grecaptcha.reset(); // Reset reCAPTCHA setelah sukses
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Terjadi kesalahan saat menghubungi server: " + error.message);
+            responseBox.value = `Terjadi kesalahan: ${error.message}`;
         }
-
-        // Reset reCAPTCHA setelah sukses
-        grecaptcha.reset();
-    } catch (error) {
-        console.error("Error:", error);
-        alert("Terjadi kesalahan saat menghubungi server: " + error.message);
-        responseBox.value = `Terjadi kesalahan: ${error.message}`;
-    }
+    });
 });
 
 // Fungsi untuk parsing akun VLESS dari respons HTML
@@ -80,7 +81,6 @@ function processAccountData(responseText) {
         accounts: []
     };
 
-    // Ambil semua textarea yang berisi akun VLESS
     const textareas = reportDiv.getElementsByTagName("textarea");
 
     for (let textarea of textareas) {
@@ -103,8 +103,5 @@ function processAccountData(responseText) {
     }
 
     console.log("Parsed Account Data:", accountData);
-
-    // Tampilkan hasil parsing di responseBox dalam format JSON yang lebih rapi
-    const responseBox = document.getElementById("responseBox");
-    responseBox.value = JSON.stringify(accountData, null, 2);
+    document.getElementById("responseBox").value = JSON.stringify(accountData, null, 2);
 }
