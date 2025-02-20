@@ -34,14 +34,14 @@ document.addEventListener("DOMContentLoaded", async function () {
         const requestData = { serverid, username, sni_bug, protocol, ssid, captcha };
 
         try {
-            // ✅ Kirim request ke API
-            const response = await fetch("https://api.allorigins.win/raw?url=https://www.fastssh.com/page/create-obfs-process", {
+            // ✅ Gunakan proxy untuk menghindari CORS
+            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent("https://www.fastssh.com/page/create-obfs-process")}`;
+
+            const response = await fetch(proxyUrl, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "User-Agent": navigator.userAgent,
-                    "Referer": "https://www.fastssh.com/",
-                    "Origin": "https://www.fastssh.com/"
+                    "User-Agent": navigator.userAgent
                 },
                 body: JSON.stringify(requestData),
             });
@@ -119,7 +119,9 @@ function processAccountData(responseText) {
 // ✅ Fungsi untuk mengambil `serverid` dan `ssid` jika belum ada
 async function fetchServerData() {
     try {
-        const response = await fetch("https://www.fastssh.com/");
+        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent("https://www.fastssh.com/")}`;
+
+        const response = await fetch(proxyUrl);
         const text = await response.text();
         const parser = new DOMParser();
         const doc = parser.parseFromString(text, "text/html");
