@@ -88,7 +88,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     async function sendRequest(requestData) {
         try {
-            const proxyUrl = "https://api.allorigins.win/raw?url=";
+            const proxyUrl = "https://vercel-cors-ten.vercel.app/proxy?url=";
             const targetUrl = "https://www.fastssh.com/page/create-obfs-process";
             
             const formData = new FormData();
