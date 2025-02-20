@@ -1,43 +1,32 @@
-require('dotenv').config();
-const express = require('express');
-const axios = require('axios');
-const cors = require('cors');
+const express = require("express");
+const cors = require("cors");
+const bodyParser = require("body-parser");
 
 const app = express();
-app.use(express.json());
 app.use(cors());
+app.use(bodyParser.json());
 
-const SITE_KEY = process.env.SITE_KEY;
-const FASTSSH_URL = process.env.FASTSSH_URL;
+app.post("/create-account", async (req, res) => {
+    const { username, sni, protocol, recaptcha } = req.body;
 
-// Route untuk verifikasi reCAPTCHA dan forward request ke FastSSH
-app.post('/create-account', async (req, res) => {
-    try {
-        const { recaptchaResponse, formData } = req.body;
-
-        // Verifikasi reCAPTCHA dengan Google
-        const googleResponse = await axios.post(`https://cors-anywhere-0.glitch.me/https://www.google.com/recaptcha/api/siteverify`, null, {
-            params: {
-                secret: SITE_KEY,
-                response: recaptchaResponse
-            }
-        });        
-
-        if (!googleResponse.data.success) {
-            return res.status(400).json({ error: 'reCAPTCHA validation failed' });
-        }
-
-        // Kirim permintaan ke FastSSH
-        const fastSshResponse = await axios.post(FASTSSH_URL, formData, {
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-        });
-
-        res.json(fastSshResponse.data);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
+    if (!username || !sni || !protocol || !recaptcha) {
+        return res.json({ success: false, error: "Data tidak lengkap!" });
     }
+
+    // Validasi reCAPTCHA
+    const recaptchaSecret = "YOUR_SECRET_KEY";
+    const recaptchaResponse = await fetch(`https://www.google.com/recaptcha/api/siteverify?secret=${recaptchaSecret}&response=${recaptcha}`, {
+        method: "POST"
+    }).then(res => res.json());
+
+    if (!recaptchaResponse.success) {
+        return res.json({ success: false, error: "Verifikasi reCAPTCHA gagal!" });
+    }
+
+    // Simulasi akun yang dibuat
+    const accountData = `Username: ${username}\nSNI: ${sni}\nProtocol: ${protocol}`;
+
+    res.json({ success: true, accountData });
 });
 
-const PORT = 3000;
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+app.listen(3000, () => console.log("Server berjalan di port 3000"));

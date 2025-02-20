@@ -1,60 +1,47 @@
 document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("submitBtn").addEventListener("click", async function () {
-        await submitForm();
-    });
-});
+        const username = document.getElementById("username").value.trim();
+        const sni = document.getElementById("sni").value.trim();
+        const protocol = document.getElementById("protocol").value;
+        const recaptchaResponse = grecaptcha.getResponse();
 
-async function submitForm() {
-    try {
-        if (typeof grecaptcha === "undefined") {
-            alert("reCAPTCHA gagal dimuat! Pastikan koneksi internet stabil lalu refresh halaman.");
+        if (!username || !sni || !protocol) {
+            alert("Harap isi semua kolom!");
             return;
         }
 
-        grecaptcha.ready(async function () {
-            try {
-                const siteKey = "6Lcvb90qAAAAAEv9mSpdybOYbTDtLIICSq5tTQex"; // Ganti dengan site key yang benar dari Google reCAPTCHA
-                const recaptchaToken = await grecaptcha.execute(siteKey, { action: "submit" });
+        if (!recaptchaResponse) {
+            alert("Harap selesaikan reCAPTCHA!");
+            return;
+        }
 
-                const username = document.getElementById("username").value.trim();
-                const sni = document.getElementById("sni").value.trim();
-                const protocol = document.getElementById("protocol").value;
+        const formData = {
+            username,
+            sni,
+            protocol,
+            recaptcha: recaptchaResponse
+        };
 
-                if (!username || !sni || !protocol) {
-                    alert("Harap isi semua kolom sebelum mengirim.");
-                    return;
-                }
+        try {
+            const response = await fetch("/create-account", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(formData)
+            });
 
-                const formData = new URLSearchParams();
-                formData.append("username", username);
-                formData.append("sni", sni);
-                formData.append("protocol", protocol);
-                formData.append("g-recaptcha-response", recaptchaToken);
+            const result = await response.json();
 
-                const targetUrl = "https://www.fastssh.com/page/create-obfs-process";
-
-                const response = await fetch(targetUrl, {
-                    method: "POST",
-                    headers: {
-                        "Accept": "application/json",
-                        "Referer": "https://www.fastssh.com/page/create-obfs-account/server/3/obfs-asia-sg/",
-                        "Origin": "https://www.fastssh.com"
-                    },
-                    body: formData
-                });
-
-                if (!response.ok) {
-                    throw new Error("Gagal membuat akun, coba lagi.");
-                }
-
-                const resultText = await response.text();
-                document.getElementById("result").innerHTML = `<pre>${resultText}</pre>`;
-            } catch (error) {
-                alert("Terjadi kesalahan: " + error.message);
+            if (result.success) {
+                document.getElementById("result").innerHTML = `
+                    <p>Akun Berhasil Dibuat:</p>
+                    <textarea rows="5" readonly>${result.accountData}</textarea>
+                `;
+                grecaptcha.reset(); // Reset reCAPTCHA setelah berhasil
+            } else {
+                alert("Gagal membuat akun: " + result.error);
             }
-        });
-    } catch (error) {
-        console.error("Error:", error);
-        alert("Kesalahan saat menghubungi server.");
-    }
-}
+        } catch (error) {
+            alert("Terjadi kesalahan: " + error.message);
+        }
+    });
+});
