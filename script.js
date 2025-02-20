@@ -3,6 +3,8 @@ document.getElementById("submitBtn").addEventListener("click", async function ()
     const sni = document.getElementById("sni").value.trim();
     const protocol = document.getElementById("protocol").value;
     const recaptchaResponse = grecaptcha.getResponse();
+    let responseBox = document.getElementById("responseBox"); // Textarea untuk menampilkan JSON
+
 
     if (!username || !sni || !protocol) {
         alert("Harap isi semua kolom!");
@@ -22,10 +24,12 @@ document.getElementById("submitBtn").addEventListener("click", async function ()
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data)
         })
-        .then(response => response.json())
-        .then(data => console.log("Response:", data))
-        .catch(error => console.error("Error:", error));
-
+        let data = await response.json();
+        responseBox.value = JSON.stringify(data, null, 2); // Format JSON ke textarea
+    } catch (error) {
+        responseBox.value = `Terjadi kesalahan: ${error.message}`;
+    }
+});
         // Pengecekan apakah response JSON valid
         const text = await response.text();
         try {
