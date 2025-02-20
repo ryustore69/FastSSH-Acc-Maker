@@ -3,7 +3,7 @@ document.getElementById("submitBtn").addEventListener("click", async function ()
     const sni = document.getElementById("sni").value.trim();
     const protocol = document.getElementById("protocol").value;
     const recaptchaResponse = grecaptcha.getResponse();
-    const responseBox = document.getElementById("responseBox"); // Textarea untuk menampilkan hasil
+    const responseBox = document.getElementById("responseBox"); // Textarea untuk hasil
 
     if (!username || !sni || !protocol) {
         alert("Harap isi semua kolom!");
@@ -15,43 +15,38 @@ document.getElementById("submitBtn").addEventListener("click", async function ()
         return;
     }
 
-    const formData = new URLSearchParams();
-    formData.append("username", username);
-    formData.append("sni", sni);
-    formData.append("protocol", protocol);
-    formData.append("recaptcha", recaptchaResponse);
+    // ✅ Pastikan data didefinisikan sebelum dipakai
+    const requestData = {
+        username: username,
+        sni: sni,
+        protocol: protocol,
+        recaptcha: recaptchaResponse
+    };
 
     try {
-        const response = await fetch("https://cors-anywhere-0.glitch.me/https://fastssh.com/page/create-obfs-process", {
+        const response = await fetch("https://fast-ssh-acc-maker.vercel.app/api/create-account", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Referer": "https://fastssh.com"
-            },
-            body: JSON.stringify(data)
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(requestData) // ✅ Menggunakan requestData, bukan "data" yang belum ada
         });
 
         const text = await response.text(); // Ambil response dalam format teks
 
         try {
-            // Coba parsing sebagai JSON
-            const result = JSON.parse(text);
-            responseBox.value = JSON.stringify(result, null, 2);
-        } catch (e) {
-            // Jika bukan JSON, coba parsing sebagai HTML
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(text, "text/html");
+            const result = JSON.parse(text); // Coba parsing response sebagai JSON
 
-            // Cari teks yang berisi konfigurasi akun
-            const reportDiv = doc.getElementById("report");
-            if (reportDiv) {
-                responseBox.value = reportDiv.innerText.trim();
+            if (result.success) {
+                responseBox.value = JSON.stringify(result, null, 2); // Tampilkan hasil JSON di textarea
+                grecaptcha.reset(); // Reset reCAPTCHA setelah sukses
             } else {
-                responseBox.value = text; // Jika tidak ditemukan, tampilkan teks asli
+                alert("Gagal membuat akun: " + (result.error || "Terjadi kesalahan tidak diketahui."));
+                responseBox.value = JSON.stringify(result, null, 2);
             }
+        } catch (e) {
+            console.error("Respon bukan JSON:", text);
+            alert("Terjadi kesalahan: Server mengembalikan data yang tidak valid.");
+            responseBox.value = text; // Tampilkan respon mentah jika bukan JSON
         }
-
-        grecaptcha.reset(); // Reset reCAPTCHA setelah sukses
 
     } catch (error) {
         alert("Terjadi kesalahan saat menghubungi server: " + error.message);
