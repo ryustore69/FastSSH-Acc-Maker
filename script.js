@@ -5,6 +5,7 @@ document.getElementById("submitBtn").addEventListener("click", async function ()
     const recaptchaResponse = grecaptcha.getResponse();
     const responseBox = document.getElementById("responseBox");
 
+    // Validasi input
     if (!username || !sni || !protocol) {
         alert("Harap isi semua kolom!");
         return;
@@ -18,32 +19,39 @@ document.getElementById("submitBtn").addEventListener("click", async function ()
     const requestData = { username, sni, protocol, recaptcha: recaptchaResponse };
 
     try {
-        const response = await fetch("https://www.fastssh.com/page/create-obfs-process", { // Change this!
+        const response = await fetch("https://corsproxy.io/?https://www.fastssh.com/page/create-obfs-process", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36",
+                "User-Agent": navigator.userAgent, // Ambil User-Agent secara dinamis
                 "Referer": "https://www.fastssh.com/",
                 "Origin": "https://www.fastssh.com/"
             },
-            body: JSON.stringify
-            })
-            .then(res => res.text())
-            .then(data => console.log(data))
-            .catch(error => console.error("Error:", error));
+            body: JSON.stringify(requestData),
+        });
+
+        // Periksa apakah respons sukses
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
 
         const text = await response.text();
         console.log("Raw Response:", text);
 
+        // Coba parse JSON jika memungkinkan
+        let result;
         try {
-            const result = JSON.parse(text);
+            result = JSON.parse(text);
             responseBox.value = JSON.stringify(result, null, 2);
-            grecaptcha.reset();
         } catch (e) {
             console.warn("Response is not JSON, displaying raw response...");
             responseBox.value = text;
         }
+
+        // Reset reCAPTCHA setelah sukses
+        grecaptcha.reset();
     } catch (error) {
+        console.error("Error:", error);
         alert("Terjadi kesalahan saat menghubungi server: " + error.message);
         responseBox.value = `Terjadi kesalahan: ${error.message}`;
     }
