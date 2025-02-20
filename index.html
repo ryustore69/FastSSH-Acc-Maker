@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Buat Akun VPN</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" 
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
 
     <!-- reCAPTCHA API -->
@@ -23,23 +24,29 @@
 
             <label for="protocol">Protocol:</label>
             <select id="protocol" name="protocol" required>
-                <option value="">Pilih Protocol</option>
-                <option value="VLESS+WS+TLS">VLESS + WS + TLS / No TLS</option>
-                <option value="VLESS+TCP+TLS">VLESS + TCP + TLS / No TLS</option>
-                <option value="VLESS+H2+TLS">VLESS + H2 + TLS</option>
-                <option value="VLESS+gRPC+TLS">VLESS + gRPC + TLS</option>
-                <option value="VLESS+XTLS">VLESS + XTLS</option>
-                <option value="VMESS+WS+TLS">VMESS + WS + TLS / No TLS</option>
-                <option value="VMESS+TCP+TLS">VMESS + TCP + TLS / No TLS</option>
-                <option value="VMESS+H2+TLS">VMESS + H2 + TLS</option>
-                <option value="VMESS+gRPC+TLS">VMESS + gRPC + TLS</option>
-                <option value="TROJAN+WS+TLS">TROJAN + WS + TLS (GO)</option>
-                <option value="TROJAN+TCP+TLS">TROJAN + TCP + TLS (GFW)</option>
-                <option value="TROJAN+gRPC+TLS">TROJAN + gRPC + TLS</option>
-                <option value="TROJAN+H2+TLS">TROJAN + H2 + TLS</option>
+                <option value="" disabled selected>Pilih Protocol</option>
+                <optgroup label="VLESS">
+                    <option value="vless-ws-tls">VLESS + WS + TLS / No TLS</option>
+                    <option value="vless-tcp-tls">VLESS + TCP + TLS / No TLS</option>
+                    <option value="vless-h2-tls">VLESS + H2 + TLS</option>
+                    <option value="vless-grpc-tls">VLESS + gRPC + TLS</option>
+                    <option value="vless-xtls">VLESS + XTLS</option>
+                </optgroup>
+                <optgroup label="VMESS">
+                    <option value="vmess-ws-tls">VMESS + WS + TLS / No TLS</option>
+                    <option value="vmess-tcp-tls">VMESS + TCP + TLS / No TLS</option>
+                    <option value="vmess-h2-tls">VMESS + H2 + TLS</option>
+                    <option value="vmess-grpc-tls">VMESS + gRPC + TLS</option>
+                </optgroup>
+                <optgroup label="TROJAN">
+                    <option value="trojan-ws-tls">TROJAN + WS + TLS (GO)</option>
+                    <option value="trojan-tcp-tls">TROJAN + TCP + TLS (GFW)</option>
+                    <option value="trojan-grpc-tls">TROJAN + gRPC + TLS</option>
+                    <option value="trojan-h2-tls">TROJAN + H2 + TLS</option>
+                </optgroup>
             </select>
 
-            <!-- Tambahkan input hidden untuk serverid dan ssid -->
+            <!-- Input Hidden untuk serverid dan ssid -->
             <input type="hidden" id="serverid" name="serverid">
             <input type="hidden" id="ssid" name="ssid">
 
