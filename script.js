@@ -1,36 +1,23 @@
 document.addEventListener("DOMContentLoaded", async function () {
     console.log("🚀 Script Loaded");
 
-    // 🔹 Ambil serverid & ssid saat halaman dimuat
+    // 🔹 Ambil serverid & ssid jika belum ada
     await fetchServerData();
 
     document.getElementById("submitBtn").addEventListener("click", async function (event) {
         event.preventDefault(); // Mencegah refresh halaman
 
         // ✅ Ambil elemen input
-        const serveridInput = document.getElementById("serverid");
-        const ssidInput = document.getElementById("ssid");
-        const usernameInput = document.getElementById("username");
-        const sniInput = document.getElementById("sni");
-        const protocolInput = document.getElementById("protocol");
+        const serverid = document.getElementById("serverid").value.trim();
+        const ssid = document.getElementById("ssid").value.trim();
+        const username = document.getElementById("username").value.trim();
+        const sni_bug = document.getElementById("sni").value.trim();
+        const protocol = document.getElementById("protocol").value;
+        const captcha = grecaptcha.getResponse();
         const responseBox = document.getElementById("responseBox");
 
-        // ✅ Validasi elemen
-        if (!serveridInput || !ssidInput || !usernameInput || !sniInput || !protocolInput) {
-            alert("❌ Input tidak lengkap! Pastikan semua elemen ditemukan.");
-            return;
-        }
-
-        // ✅ Ambil nilai dari input
-        const serverid = serveridInput.value.trim();
-        const ssid = ssidInput.value.trim();
-        const username = usernameInput.value.trim();
-        const sni = sniInput.value.trim();
-        const protocol = protocolInput.value;
-        const captcha = grecaptcha.getResponse();
-
         // ✅ Validasi input sebelum request
-        if (!serverid || !ssid || !username || !sni || !protocol) {
+        if (!serverid || !ssid || !username || !sni_bug || !protocol) {
             alert("❌ Harap isi semua kolom!");
             return;
         }
@@ -40,25 +27,25 @@ document.addEventListener("DOMContentLoaded", async function () {
             return;
         }
 
-        console.log("🟢 Semua data valid, siap dikirim:", { serverid, ssid, username, sni, protocol, captcha });
+        console.log("🟢 Semua data valid, siap dikirim:", { serverid, ssid, username, sni_bug, protocol, captcha });
 
         // ✅ Kirim request menggunakan proxy CORS
-        await sendRequest({ serverid, ssid, username, sni, protocol, captcha });
+        await sendRequest({ serverid, ssid, username, sni_bug, protocol, captcha });
     });
 });
 
-// ✅ Fungsi mengirim request ke server dengan proxy
+// ✅ Fungsi mengirim request ke server dengan metode FormData
 async function sendRequest(requestData) {
     try {
         const proxyUrl = "https://corsmirror.com/v1?url=";
         const targetUrl = "https://www.fastssh.com/page/create-obfs-process";
-        
+
         const formData = new FormData();
         formData.append("serverid", requestData.serverid);
         formData.append("ssid", requestData.ssid);
         formData.append("username", requestData.username);
-        formData.append("sni", requestData.sni);
-        formData.append("protocol", requestData.protocol);
+        formData.append("sni", requestData.sni_bug); // Gunakan key "sni" bukan "sni_bug"
+        formData.append("protocol", requestData.protocol.toLowerCase()); // Perbaikan format protocol
         formData.append("captcha", requestData.captcha);
 
         const response = await fetch(proxyUrl + encodeURIComponent(targetUrl), {
@@ -66,39 +53,31 @@ async function sendRequest(requestData) {
             body: formData
         });
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
         const text = await response.text();
         console.log("✅ Raw Response:", text);
 
-        // Cek jika server meminta protocol yang benar
-        if (text.includes("Please choose a correct protocol")) {
-            alert("❌ ERROR: Format protocol tidak valid! Cek kembali pilihan protocol.");
-            return;
-        }
+        // ✅ Parsing data akun dari HTML response
+        processAccountData(text);
 
-        try {
-            const result = JSON.parse(text);
-            document.getElementById("responseBox").value = JSON.stringify(result, null, 2);
-            processAccountData(result);
-        } catch (e) {
-            console.warn("⚠️ Response bukan JSON, menampilkan raw response...");
-            document.getElementById("responseBox").value = text;
-        }
-
-        grecaptcha.reset();
+        grecaptcha.reset(); // ✅ Reset reCAPTCHA setelah sukses
     } catch (error) {
         console.error("❌ Error:", error);
-        alert("Terjadi kesalahan saat menghubungi server: " + error.message);
+        alert("Terjadi kesalahan: " + error.message);
         document.getElementById("responseBox").value = `Terjadi kesalahan: ${error.message}`;
     }
 }
 
-
 // ✅ Fungsi parsing akun VPN dari respons HTML
-function processAccountData(responseData) {
+function processAccountData(responseText) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(responseText, "text/html");
+    const reportDiv = doc.getElementById("report");
+
+    if (!reportDiv) {
+        console.error("❌ Elemen report tidak ditemukan dalam respons.");
+        return;
+    }
+
     const accountData = {
         status: "success",
         message: "✅ Akun berhasil dibuat",
@@ -106,27 +85,23 @@ function processAccountData(responseData) {
         accounts: []
     };
 
-    if (responseData && responseData.report) {
-        const textareas = responseData.report.match(/<textarea[^>]*>(.*?)<\/textarea>/g);
+    const textareas = reportDiv.getElementsByTagName("textarea");
 
-        if (textareas) {
-            textareas.forEach(textarea => {
-                const value = textarea.replace(/<textarea[^>]*>|<\/textarea>/g, "").trim();
-                const match = value.match(/vless:\/\/([^@]+)@([^:]+):(\d+)\?path=([^&]+)&security=([^&]+)&encryption=([^&]+)&type=([^&]+)(?:&sni=([^#]+))?#(.+)/);
+    for (let textarea of textareas) {
+        const value = textarea.value.trim();
+        const match = value.match(/vless:\/\/([^@]+)@([^:]+):(\d+)\?path=([^&]+)&security=([^&]+)&encryption=([^&]+)&type=([^&]+)(?:&sni=([^#]+))?#(.+)/);
 
-                if (match) {
-                    accountData.accounts.push({
-                        uuid: match[1],
-                        server: match[2],
-                        port: match[3],
-                        path: decodeURIComponent(match[4]),
-                        security: match[5],
-                        encryption: match[6],
-                        type: match[7],
-                        sni: match[8] || "None",
-                        description: match[9]
-                    });
-                }
+        if (match) {
+            accountData.accounts.push({
+                uuid: match[1],
+                server: match[2],
+                port: match[3],
+                path: decodeURIComponent(match[4]),
+                security: match[5],
+                encryption: match[6],
+                type: match[7],
+                sni: match[8] || "None",
+                description: match[9]
             });
         }
     }
@@ -158,15 +133,6 @@ async function fetchServerData() {
         // ✅ Ambil nilai dari halaman yang di-fetch
         const fetchedServerid = doc.querySelector("input[name='serverid']")?.value || "";
         const fetchedSsid = doc.querySelector("input[name='ssid']")?.value || "";
-
-        // ✅ Debugging nilai yang diambil
-        console.log("🔍 Server ID dari halaman:", fetchedServerid);
-        console.log("🔍 SSID dari halaman:", fetchedSsid);
-
-        if (!fetchedServerid || !fetchedSsid) {
-            console.warn("⚠️ Server ID atau SSID tidak ditemukan dalam halaman sumber.");
-            return;
-        }
 
         // ✅ Masukkan ke input di halaman
         serveridElem.value = fetchedServerid;

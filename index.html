@@ -24,7 +24,7 @@
 
             <label for="protocol">Protocol:</label>
             <select id="protocol" name="protocol" required>
-                <option value>Pilih Protocol</option>
+                <option value="">Pilih Protocol</option>
                 <optgroup label="VLESS">
                     <option value="vless-ws">VLESS + WS + TLS / No TLS</option>
                     <option value="vless-tcp">VLESS + TCP + TLS / No TLS</option>
@@ -45,6 +45,7 @@
                     <option value="trojan-h2">TROJAN + H2 + TLS</option>
                 </optgroup>
             </select>
+
 
             <!-- Input Hidden untuk serverid dan ssid -->
             <input type="hidden" id="serverid" name="serverid">
