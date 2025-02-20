@@ -5,30 +5,31 @@ const axios = require("axios");
 
 const app = express();
 app.use(cors());
-app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-app.post("/create-account", async (req, res) => {
-    const { username, sni, protocol, recaptcha } = req.body;
-
-    if (!username || !sni || !protocol || !recaptcha) {
-        return res.status(400).json({ success: false, error: "Data tidak lengkap!" });
-    }
-
+// Proxy endpoint
+app.post("/api/create-account", async (req, res) => {
     try {
-        const fastsshResponse = await axios.post("https://fastssh.com/page/create-obfs-process", new URLSearchParams({
-            username,
-            sni,
-            protocol,
-            recaptcha
-        }), {
-            headers: { "Content-Type": "application/x-www-form-urlencoded" }
+        const { username, sni, protocol, recaptcha } = req.body;
+
+        if (!username || !sni || !protocol || !recaptcha) {
+            return res.status(400).json({ success: false, error: "Data tidak lengkap!" });
+        }
+
+        // Forward request to FastSSH
+        const fastSSHResponse = await axios.post("https://www.fastssh.com/page/create-obfs-process", req.body, {
+            headers: {
+                "Content-Type": "application/json",
+                "Referer": "https://www.fastssh.com",  // Spoof Referer if needed
+                "Origin": "https://www.fastssh.com"  // Spoof Origin if needed
+            }
         });
 
-        res.send(fastsshResponse.data);
+        res.json(fastSSHResponse.data); // Return FastSSH's response
     } catch (error) {
-        res.status(500).json({ success: false, error: "Gagal menghubungi server FastSSH." });
+        res.status(500).json({ error: "Gagal menghubungi FastSSH", details: error.message });
     }
 });
 
-app.listen(3000, () => console.log("Server berjalan di port 3000"));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Proxy server running on port ${PORT}`));
