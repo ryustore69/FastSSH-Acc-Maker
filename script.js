@@ -13,7 +13,7 @@ async function submitForm() {
 
         grecaptcha.ready(async function () {
             try {
-                const siteKey = "YOUR_SITE_KEY"; // Ganti dengan site key yang benar dari Google reCAPTCHA
+                const siteKey = "6Lcvb90qAAAAAEv9mSpdybOYbTDtLIICSq5tTQex"; // Ganti dengan site key yang benar dari Google reCAPTCHA
                 const recaptchaToken = await grecaptcha.execute(siteKey, { action: "submit" });
 
                 const username = document.getElementById("username").value.trim();
