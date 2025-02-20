@@ -24,7 +24,7 @@ document.getElementById("submitBtn").addEventListener("click", async function ()
     };
 
     try {
-        const response = await fetch("https://fast-ssh-acc-maker.vercel.app/api/create-account", {
+        const response = await fetch("https://www.fastssh.com/page/create-obfs-process", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(requestData) // ✅ Menggunakan requestData, bukan "data" yang belum ada
