@@ -20,8 +20,11 @@ document.getElementById("submitBtn").addEventListener("click", async function ()
     try {
         const response = await fetch("https://www.fastssh.com/page/create-obfs-process", { // Change this!
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(requestData)
+            mode: "no-cors",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(requestData),
         });
 
         const text = await response.text();
