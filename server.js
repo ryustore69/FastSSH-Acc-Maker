@@ -1,46 +1,37 @@
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-const axios = require("axios");
 
 const app = express();
 
-// ✅ Allow all origins (or specify a domain)
+// ✅ Konfigurasi CORS agar mengizinkan request dari frontend
 app.use(cors({
-    origin: "*", // Change to "https://yourfrontend.com" if needed
+    origin: "https://fast-ssh-acc-maker.vercel.app", // Ganti dengan domain frontend Anda
     methods: "GET, POST, OPTIONS",
     allowedHeaders: "Content-Type, Authorization"
 }));
 
 app.use(bodyParser.json());
 
-// ✅ Handle preflight CORS requests
+// ✅ Menangani preflight request OPTIONS
 app.options("*", (req, res) => {
     res.sendStatus(200);
 });
 
-// ✅ Proxy endpoint to FastSSH
+// ✅ Contoh endpoint untuk menerima request dari frontend
 app.post("/api/create-account", async (req, res) => {
     try {
         const { username, sni, protocol, recaptcha } = req.body;
 
         if (!username || !sni || !protocol || !recaptcha) {
-            return res.status(400).json({ success: false, error: "Missing required fields!" });
+            return res.status(400).json({ success: false, error: "Data tidak lengkap!" });
         }
 
-        const fastSSHResponse = await axios.post("https://www.fastssh.com/page/create-obfs-process", req.body, {
-            headers: {
-                "Content-Type": "application/json",
-                "Referer": "https://www.fastssh.com", // Spoof Referer if needed
-                "Origin": "https://www.fastssh.com"  // Spoof Origin if needed
-            }
-        });
-
-        res.json(fastSSHResponse.data); // Return FastSSH's response
+        res.json({ success: true, message: "Akun berhasil dibuat", data: { username, sni, protocol } });
     } catch (error) {
-        res.status(500).json({ error: "Failed to contact FastSSH", details: error.message });
+        res.status(500).json({ error: "Terjadi kesalahan pada server", details: error.message });
     }
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Server berjalan di port ${PORT}`));
