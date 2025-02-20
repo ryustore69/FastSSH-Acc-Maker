@@ -50,10 +50,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 // ✅ Fungsi mengirim request ke server
 async function sendRequest(requestData) {
     try {
-        // Gunakan proxy untuk menghindari CORS
-        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent("https://www.fastssh.com/page/create-obfs-process")}`;
-
-        const response = await fetch(proxyUrl, {
+        const response = await fetch("https://www.fastssh.com/page/create-obfs-process", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -69,7 +66,6 @@ async function sendRequest(requestData) {
         const text = await response.text();
         console.log("✅ Raw Response:", text);
 
-        // ✅ Coba parse JSON jika memungkinkan
         try {
             const result = JSON.parse(text);
             document.getElementById("responseBox").value = JSON.stringify(result, null, 2);
@@ -79,7 +75,7 @@ async function sendRequest(requestData) {
             document.getElementById("responseBox").value = text;
         }
 
-        grecaptcha.reset(); // ✅ Reset reCAPTCHA setelah sukses
+        grecaptcha.reset();
     } catch (error) {
         console.error("❌ Error:", error);
         alert("Terjadi kesalahan saat menghubungi server: " + error.message);
@@ -125,11 +121,11 @@ function processAccountData(responseData) {
     document.getElementById("responseBox").value = JSON.stringify(accountData, null, 2);
 }
 
-// ✅ Fungsi mengambil `serverid` dan `ssid` jika belum ada
+// ✅ Fungsi mengambil `serverid` dan `ssid`
 async function fetchServerData() {
     try {
-        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent("https://www.fastssh.com/")}`;
-        const response = await fetch(proxyUrl);
+        const targetUrl = "https://www.fastssh.com/page/create-obfs-account/server/3/obfs-asia-sg/";
+        const response = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`);
         const text = await response.text();
         const parser = new DOMParser();
         const doc = parser.parseFromString(text, "text/html");
@@ -139,17 +135,22 @@ async function fetchServerData() {
         const ssidElem = document.getElementById("ssid");
 
         if (!serveridElem || !ssidElem) {
-            console.error("❌ Elemen serverid atau ssid tidak ditemukan!");
+            console.error("❌ Elemen serverid atau ssid tidak ditemukan di halaman!");
             return;
         }
 
-        // ✅ Ambil nilai dari halaman
+        // ✅ Ambil nilai dari halaman yang di-fetch
         const fetchedServerid = doc.querySelector("input[name='serverid']")?.value || "";
         const fetchedSsid = doc.querySelector("input[name='ssid']")?.value || "";
 
         // ✅ Debugging nilai yang diambil
         console.log("🔍 Server ID dari halaman:", fetchedServerid);
         console.log("🔍 SSID dari halaman:", fetchedSsid);
+
+        if (!fetchedServerid || !fetchedSsid) {
+            console.warn("⚠️ Server ID atau SSID tidak ditemukan dalam halaman sumber.");
+            return;
+        }
 
         // ✅ Masukkan ke input di halaman
         serveridElem.value = fetchedServerid;
