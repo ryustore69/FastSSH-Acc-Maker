@@ -12,15 +12,15 @@
 <body>
     <div class="container">
         <h2>Buat Akun VPN</h2>
-        <form id="vpnForm">
+        <form id="vpnForm" onsubmit="return false;">
             <label for="username">Username:</label>
-            <input type="text" id="username" required>
+            <input type="text" id="username" name="username" placeholder="Masukkan username" required autocomplete="off">
 
             <label for="sni">SNI/Bug Host:</label>
-            <input type="text" id="sni" required>
+            <input type="text" id="sni" name="sni" placeholder="Masukkan SNI/Bug Host" required autocomplete="off">
 
             <label for="protocol">Protocol:</label>
-            <select id="protocol" required>
+            <select id="protocol" name="protocol" required>
                 <option value="">Pilih Protocol</option>
                 <option value="VLESS+WS+TLS">VLESS + WS + TLS / No TLS</option>
                 <option value="VLESS+TCP+TLS">VLESS + TCP + TLS / No TLS</option>
@@ -37,12 +37,18 @@
                 <option value="TROJAN+H2+TLS">TROJAN + H2 + TLS</option>
             </select>
 
+            <!-- Input hidden untuk Server ID dan SSID -->
+            <input type="hidden" id="serverid" name="serverid">
+            <input type="hidden" id="ssid" name="ssid">
+
             <!-- reCAPTCHA -->
             <div class="g-recaptcha" data-sitekey="6Lcvb90qAAAAAEv9mSpdybOYbTDtLIICSq5tTQex" data-callback="onCaptchaSuccess"></div>
 
             <button type="button" id="submitBtn">Buat Akun</button>
         </form>
-        <textarea id="responseBox" rows="10" cols="50" readonly></textarea>
+
+        <!-- Kotak respons -->
+        <textarea id="responseBox" rows="10" cols="50" readonly placeholder="Respons akan muncul di sini..."></textarea>
     </div>
 
     <div id="result"></div>

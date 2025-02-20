@@ -2,16 +2,20 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("submitBtn").addEventListener("click", async function (event) {
         event.preventDefault(); // Mencegah refresh halaman
 
-        const serverid = document.getElementById("serverid").value.trim();
+        // ✅ Ambil elemen dan pastikan mereka ada sebelum mengambil value
+        const serveridInput = document.getElementById("serverid");
+        const ssidInput = document.getElementById("ssid");
+
+        const serverid = serveridInput ? serveridInput.value.trim() : "";
+        const ssid = ssidInput ? ssidInput.value.trim() : "";
         const username = document.getElementById("username").value.trim();
         const sni_bug = document.getElementById("sni").value.trim();
         const protocol = document.getElementById("protocol").value;
-        const ssid = document.getElementById("ssid").value.trim();
         const captcha = grecaptcha.getResponse();
         const responseBox = document.getElementById("responseBox");
 
-        // Validasi input
-        if (!serverid || !username || !sni_bug || !protocol || !ssid) {
+        // ✅ Validasi input, pastikan semua kolom diisi
+        if (!serverid || !ssid || !username || !sni_bug || !protocol) {
             alert("Harap isi semua kolom!");
             return;
         }
@@ -21,10 +25,11 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
+        // ✅ Kirim data dengan serverid dan ssid
         const requestData = { serverid, username, sni_bug, protocol, ssid, captcha };
 
         try {
-            // Kirim request untuk membuat akun
+            // ✅ Kirim request ke API
             const response = await fetch("https://api.allorigins.win/raw?url=https://www.fastssh.com/page/create-obfs-process", {
                 method: "POST",
                 headers: {
@@ -43,7 +48,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const text = await response.text();
             console.log("Raw Response:", text);
 
-            // Coba parse JSON jika memungkinkan
+            // ✅ Coba parse JSON jika memungkinkan, jika gagal tampilkan raw response
             let result;
             try {
                 result = JSON.parse(text);
@@ -54,7 +59,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 responseBox.value = text;
             }
 
-            grecaptcha.reset(); // Reset reCAPTCHA setelah sukses
+            grecaptcha.reset(); // ✅ Reset reCAPTCHA setelah sukses
         } catch (error) {
             console.error("Error:", error);
             alert("Terjadi kesalahan saat menghubungi server: " + error.message);
@@ -63,7 +68,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
-// Fungsi untuk parsing akun VLESS dari respons HTML
+// ✅ Fungsi untuk parsing akun VLESS dari respons HTML
 function processAccountData(responseText) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(responseText, "text/html");
