@@ -22,14 +22,14 @@ document.getElementById("submitBtn").addEventListener("click", async function ()
     formData.append("recaptcha", recaptchaResponse);
 
     try {
-        const response = await fetch("https://fastssh.com/page/create-obfs-process", {
+        const response = await fetch("https://cors-anywhere-0.glitch.me/https://fastssh.com/page/create-obfs-process", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 "Referer": "https://fastssh.com"
             },
             body: JSON.stringify(data)
-        })        
+        });
 
         const text = await response.text(); // Ambil response dalam format teks
 
