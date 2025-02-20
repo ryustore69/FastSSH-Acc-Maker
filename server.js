@@ -16,12 +16,12 @@ app.post('/create-account', async (req, res) => {
         const { recaptchaResponse, formData } = req.body;
 
         // Verifikasi reCAPTCHA dengan Google
-        const googleResponse = await axios.post(`https://www.google.com/recaptcha/api/siteverify`, null, {
+        const googleResponse = await axios.post(`https://cors-anywhere-0.glitch.me/https://www.google.com/recaptcha/api/siteverify`, null, {
             params: {
                 secret: SITE_KEY,
                 response: recaptchaResponse
             }
-        });
+        });        
 
         if (!googleResponse.data.success) {
             return res.status(400).json({ error: 'reCAPTCHA validation failed' });
