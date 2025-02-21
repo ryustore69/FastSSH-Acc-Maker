@@ -1,5 +1,8 @@
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
     const submitBtn = document.getElementById("submitBtn");
+
+    // Ambil serverid, ssid, dan captcha saat halaman dimuat
+    await loadServerData();
 
     submitBtn.addEventListener("click", async function (event) {
         event.preventDefault();
@@ -7,21 +10,16 @@ document.addEventListener("DOMContentLoaded", function () {
         const username = document.getElementById("username").value.trim();
         const sni = document.getElementById("sni").value.trim();
         const protocol = document.getElementById("protocol").value;
-        const captcha = document.getElementById("captcha").value;
+        const captcha = document.getElementById("captcha").value.trim();
+        const serverid = document.getElementById("serverid").value;
+        const ssid = document.getElementById("ssid").value;
 
-        if (!username || !sni || !protocol || !captcha) {
+        if (!username || !sni || !protocol || !captcha || !serverid || !ssid) {
             alert("⚠️ Semua kolom harus diisi!");
             return;
         }
 
         try {
-            const { serverid, ssid } = await fetchServerData();
-            console.log("🔹 Server ID:", serverid, "SSID:", ssid);
-
-            if (!serverid || !ssid) {
-                throw new Error("Server ID atau SSID tidak ditemukan!");
-            }
-
             const requestBody = new URLSearchParams({
                 "serverid": serverid,
                 "username": username,
@@ -52,7 +50,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
-async function fetchServerData() {
+async function loadServerData() {
     const apiUrl = "https://sparkling-limit-b5ca.corspass.workers.dev/?apiurl=https://www.fastssh.com/page/create-obfs-account/server/3/obfs-asia-sg/";
 
     try {
@@ -64,21 +62,28 @@ async function fetchServerData() {
 
         const serveridInput = doc.querySelector("input[name='serverid']");
         const ssidInput = doc.querySelector("input[name='ssid']");
+        const captchaImg = doc.querySelector("img[alt='Captcha']");
 
         if (serveridInput && ssidInput) {
-            return {
-                serverid: serveridInput.value,
-                ssid: ssidInput.value
-            };
+            document.getElementById("serverid").value = serveridInput.value;
+            document.getElementById("ssid").value = ssidInput.value;
+        } else {
+            throw new Error("Elemen serverid atau ssid tidak ditemukan!");
         }
 
-        throw new Error("Elemen serverid atau ssid tidak ditemukan!");
+        if (captchaImg) {
+            document.getElementById("captchaImg").src = captchaImg.src;
+        } else {
+            throw new Error("Captcha tidak ditemukan!");
+        }
+
+        console.log("🔹 Data Server ID:", serveridInput.value, "SSID:", ssidInput.value);
 
     } catch (error) {
         console.error("Gagal mengambil data server:", error);
-        return { serverid: null, ssid: null };
     }
 }
+
 
 // Fungsi untuk parsing akun VLESS dari respons HTML
 function processAccountData(responseText) {
