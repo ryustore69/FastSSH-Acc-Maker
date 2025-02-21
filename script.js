@@ -5,33 +5,61 @@ document.addEventListener("DOMContentLoaded", function () {
 document.getElementById("submitBtn").addEventListener("click", async function (event) {
     event.preventDefault();
 
-    // Ambil nilai dari dropdown
-    const protocolFull = document.getElementById("protocol").value; // Contoh: "VLESS-WS"
-    const [protocol, type] = protocolFull.toLowerCase().split("-"); // ["vless", "ws"]
-
-    // Tentukan parameter security
-    const security = type === "h2" || type === "grpc" || type === "tcp-xtls" ? "tls" : "none";
-
-    // Validasi input sebelum request
+    // Ambil nilai dari input form
     const serverid = document.getElementById("serverid").value;
-    const ssid = document.getElementById("ssid").value;
     const username = document.getElementById("username").value;
-    const sni = document.getElementById("sni").value;
+    const sni_bug = document.getElementById("sni").value;
+    const protocol = document.getElementById("protocol").value;
+    const ssid = document.getElementById("ssid").value;
     const captcha = grecaptcha.getResponse();
 
-    if (!serverid || !ssid || !username || !sni || !protocol) {
+    // Validasi input sebelum mengirim
+    if (!serverid || !username || !sni_bug || !protocol || !ssid || !captcha) {
         alert("❌ Harap isi semua kolom!");
         return;
     }
-    if (!captcha) {
-        alert("⚠️ Harap selesaikan reCAPTCHA!");
-        return;
+
+    // Log untuk memastikan data yang dikirim sudah benar
+    console.log("🔍 Data yang akan dikirim ke server:");
+    console.table({ serverid, username, sni_bug, protocol, ssid, captcha });
+
+    try {
+        const response = await fetch("/proxy", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: new URLSearchParams({
+                serverid: serverid,
+                username: username,
+                sni_bug: sni_bug,
+                protocol: protocol,
+                ssid: ssid,
+                captcha: captcha
+            })
+        });
+
+        // Log untuk melihat apakah fetch berhasil
+        console.log("✅ Fetch berhasil, menunggu response dari server...");
+
+        const text = await response.text();
+        console.log("✅ Response dari server:", text); // Log response dari server
+
+        document.getElementById("responseBox").value = text;
+
+        // Cek apakah ada error dari server
+        if (text.includes("Please choose a correct protocol")) {
+            alert("❌ ERROR: Format protocol tidak valid! Cek kembali pilihan protocol.");
+        } else if (text.includes("Wrong Captcha")) {
+            alert("❌ ERROR: CAPTCHA tidak valid. Harap selesaikan ulang!");
+            grecaptcha.reset();
+        } else {
+            console.log("✅ Akun berhasil dibuat!");
+        }
+    } catch (error) {
+        console.error("❌ Error:", error);
+        alert("Terjadi kesalahan: " + error.message);
     }
-
-    console.log("🟢 Semua data valid, siap dikirim:", { serverid, ssid, username, sni, protocol, type, security, captcha });
-
-    // Kirim request dengan data yang benar
-    await sendRequest({ serverid, ssid, username, sni, protocol, type, security, captcha });
 });
 
 // ✅ Fungsi mengirim request ke server dengan proxy

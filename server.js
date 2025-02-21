@@ -1,22 +1,25 @@
 const express = require("express");
 const cors = require("cors");
 const fetch = require("node-fetch");
+const qs = require("querystring");
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.urlencoded({ extended: true })); // Tambahkan middleware ini
 
 app.post("/proxy", async (req, res) => {
   try {
+    const formData = qs.stringify(req.body); // Ubah JSON ke format URL-encoded
+
     const response = await fetch("https://www.fastssh.com/page/create-obfs-process", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
-        "User-Agent": req.headers["user-agent"], // Gunakan user-agent browser
+        "Content-Type": "application/x-www-form-urlencoded",
+        "User-Agent": req.headers["user-agent"],
         "Referer": "https://www.fastssh.com/",
         "Origin": "https://www.fastssh.com/"
       },
-      body: JSON.stringify(req.body)
+      body: formData
     });
 
     const data = await response.text();
