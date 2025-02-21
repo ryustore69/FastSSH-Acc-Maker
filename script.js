@@ -1,49 +1,58 @@
-document.getElementById("submitBtn").addEventListener("click", function () {
-    // Ambil nilai input dari elemen HTML
-    const username = document.getElementById("username").value.trim();
-    const sni = document.getElementById("sni").value.trim();
-    const protocol = document.getElementById("protocol").value.trim();
-    const recaptcha = document.getElementById("recaptcha").value.trim();
-
-    // Validasi input agar tidak kosong
-    if (!username || !sni || !protocol || !recaptcha) {
-        alert("Semua kolom harus diisi!");
+document.addEventListener("DOMContentLoaded", function () {
+    // Pastikan tombol ada sebelum menambahkan event listener
+    const submitBtn = document.getElementById("submitBtn");
+    if (!submitBtn) {
+        console.error("Tombol submit tidak ditemukan!");
         return;
     }
 
-    // Buat body request secara dinamis berdasarkan input
-    const requestBody = {
-        username: username,
-        sni: sni,
-        protocol: protocol,
-        recaptcha: recaptcha
-    };
+    submitBtn.addEventListener("click", function () {
+        // Ambil nilai input dari elemen HTML
+        const username = document.getElementById("username")?.value.trim();
+        const sni = document.getElementById("sni")?.value.trim();
+        const protocol = document.getElementById("protocol")?.value.trim();
+        const recaptcha = document.getElementById("recaptcha")?.value.trim();
 
-    // URL tujuan
-    const apiUrl = "https://bypass-cors.vercel.app/?url=" + encodeURIComponent("https://www.fastssh.com/page/create-obfs-process");
-
-    // Kirim permintaan POST
-    fetch(apiUrl, {
-        method: "POST",
-        headers: {
-            "Accept": "application/json",
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(requestBody)
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
+        // Validasi input agar tidak kosong
+        if (!username || !sni || !protocol || !recaptcha) {
+            alert("Semua kolom harus diisi!");
+            return;
         }
-        return response.json();
-    })
-    .then(data => {
-        console.log("Success:", data);
-        alert("Berhasil membuat akun!");
-    })
-    .catch(error => {
-        console.error("Error:", error);
-        alert("Terjadi kesalahan saat mengirim data!");
+
+        // Buat body request secara dinamis berdasarkan input
+        const requestBody = {
+            username: username,
+            sni: sni,
+            protocol: protocol,
+            recaptcha: recaptcha
+        };
+
+        // URL tujuan
+        const apiUrl = "https://bypass-cors.vercel.app/?url=" + encodeURIComponent("https://www.fastssh.com/page/create-obfs-process");
+
+        // Kirim permintaan POST
+        fetch(apiUrl, {
+            method: "POST",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(requestBody)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log("Success:", data);
+            alert("Berhasil membuat akun!");
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            alert("Terjadi kesalahan saat mengirim data!");
+        });
     });
 });
 
