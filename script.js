@@ -108,6 +108,15 @@ async function sendRequest(requestData) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
 
+        fetch(url, options)
+        .then(res => res.text())
+        .then(text => {
+            console.log("Respon dari FastSSH:", text);
+            res.send(text);
+        })
+        .catch(err => console.error("Error saat menghubungi FastSSH:", err));
+
+
         const text = await response.text();
         console.log("✅ Raw Response:", text);
 
