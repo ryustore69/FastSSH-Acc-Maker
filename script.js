@@ -2,8 +2,8 @@ document.addEventListener("DOMContentLoaded", function () {
     fetchServerData(); // Ambil serverid & ssid saat halaman dimuat
 });
 
-const proxyUrl = "https://corsmirror.com/v1?url=";
-const targetUrl = "https://www.fastssh.com/page/create-obfs-process";
+/* const proxyUrl = "https://corsmirror.com/v1?url=";
+const targetUrl = "https://www.fastssh.com/page/create-obfs-process"; */
 
 document.getElementById("submitBtn").addEventListener("click", async function (event) {
     event.preventDefault();
@@ -37,7 +37,9 @@ document.getElementById("submitBtn").addEventListener("click", async function (e
 
         console.log("📤 Payload yang dikirim:", Object.fromEntries(formData));
 
-        const response = await fetch(proxyUrl + encodeURIComponent(targetUrl), {
+        /* const response = await fetch(proxyUrl + encodeURIComponent(targetUrl), { */
+        const response = await fetch("https://www.fastssh.com/page/create-obfs-process", {
+
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
