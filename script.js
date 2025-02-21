@@ -52,59 +52,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
-document.addEventListener("DOMContentLoaded", async function () {
-    const submitBtn = document.getElementById("submitBtn");
-
-    // Ambil serverid, ssid, dan captcha saat halaman dimuat
-    await loadServerData();
-
-    submitBtn.addEventListener("click", async function (event) {
-        event.preventDefault();
-
-        const username = document.getElementById("username").value.trim();
-        const sni = document.getElementById("sni").value.trim();
-        const protocol = document.getElementById("protocol").value;
-        const captcha = document.getElementById("captcha").value.trim();
-        const serverid = document.getElementById("serverid").value;
-        const ssid = document.getElementById("ssid").value;
-
-        if (!username || !sni || !protocol || !captcha || !serverid || !ssid) {
-            alert("⚠️ Semua kolom harus diisi!");
-            return;
-        }
-
-        try {
-            const requestBody = new URLSearchParams({
-                "serverid": serverid,
-                "username": username,
-                "sni_bug": sni,
-                "protocol": protocol,
-                "ssid": ssid,
-                "captcha": captcha
-            });
-
-            const apiUrl = "https://sparkling-limit-b5ca.corspass.workers.dev/?apiurl=https://www.fastssh.com/page/create-obfs-process";
-
-            const response = await fetch(apiUrl, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded"
-                },
-                body: requestBody
-            });
-
-            const responseText = await response.text();
-            console.log("✅ Respons Server:", responseText);
-            document.getElementById("responseBox").value = responseText;
-
-        } catch (error) {
-            console.error("❌ Error:", error);
-            alert("Gagal membuat akun. Silakan coba lagi.");
-        }
-    });
-});
-
-async function loadServerData() {
+async function fetchServerData() {
     const apiUrl = "https://sparkling-limit-b5ca.corspass.workers.dev/?apiurl=https://www.fastssh.com/page/create-obfs-account/server/3/obfs-asia-sg/";
 
     try {
@@ -116,28 +64,21 @@ async function loadServerData() {
 
         const serveridInput = doc.querySelector("input[name='serverid']");
         const ssidInput = doc.querySelector("input[name='ssid']");
-        const captchaImg = doc.querySelector("img[alt='Captcha']");
 
         if (serveridInput && ssidInput) {
-            document.getElementById("serverid").value = serveridInput.value;
-            document.getElementById("ssid").value = ssidInput.value;
-        } else {
-            throw new Error("Elemen serverid atau ssid tidak ditemukan!");
+            return {
+                serverid: serveridInput.value,
+                ssid: ssidInput.value
+            };
         }
 
-        if (captchaImg) {
-            document.getElementById("captchaImg").src = captchaImg.src;
-        } else {
-            throw new Error("Captcha tidak ditemukan!");
-        }
-
-        console.log("🔹 Data Server ID:", serveridInput.value, "SSID:", ssidInput.value);
+        throw new Error("Elemen serverid atau ssid tidak ditemukan!");
 
     } catch (error) {
         console.error("Gagal mengambil data server:", error);
+        return { serverid: null, ssid: null };
     }
 }
-
 
 // Fungsi untuk parsing akun VLESS dari respons HTML
 function processAccountData(responseText) {
