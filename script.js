@@ -5,18 +5,21 @@ document.addEventListener("DOMContentLoaded", function () {
 document.getElementById("submitBtn").addEventListener("click", async function (event) {
     event.preventDefault();
 
-    // Ambil nilai dari input dan dropdown
+    // Ambil nilai dari dropdown
+    const protocolFull = document.getElementById("protocol").value; // Contoh: "VLESS-WS"
+    const [protocol, type] = protocolFull.toLowerCase().split("-"); // ["vless", "ws"]
+
+    // Tentukan parameter security
+    const security = type === "h2" || type === "grpc" || type === "tcp-xtls" ? "tls" : "none";
+
+    // Validasi input sebelum request
     const serverid = document.getElementById("serverid").value;
     const ssid = document.getElementById("ssid").value;
     const username = document.getElementById("username").value;
     const sni = document.getElementById("sni").value;
-    const protocolFull = document.getElementById("protocol").value; // Misal: "vless-ws"
-    const [protocol, type] = protocolFull.toLowerCase().split("-"); // ["vless", "ws"]
-    const security = type === "h2" || type === "grpc" || type === "tcp-xtls" ? "tls" : "none";
     const captcha = grecaptcha.getResponse();
 
-    // ✅ Validasi input sebelum request
-    if (!serverid || !ssid || !username || !sni || !protocol || !type) {
+    if (!serverid || !ssid || !username || !sni || !protocol) {
         alert("❌ Harap isi semua kolom!");
         return;
     }
@@ -25,39 +28,32 @@ document.getElementById("submitBtn").addEventListener("click", async function (e
         return;
     }
 
-    // **Validasi protocol dan type**: Pastikan protocol dan type valid
-    const validProtocols = ["vless", "trojan", "vmess"];
-    const validTypes = ["ws", "h2", "grpc", "tcp", "tcp-xtls"];
-    if (!validProtocols.includes(protocol) || !validTypes.includes(type)) {
-        alert("❌ Protocol atau type tidak valid!");
-        return;
-    }
-
     console.log("🟢 Semua data valid, siap dikirim:", { serverid, ssid, username, sni, protocol, type, security, captcha });
 
-    // ✅ Kirim request
+    // Kirim request dengan data yang benar
     await sendRequest({ serverid, ssid, username, sni, protocol, type, security, captcha });
 });
 
 // ✅ Fungsi mengirim request ke server dengan proxy
 async function sendRequest(requestData) {
     const formData = new URLSearchParams();
+
     formData.append("serverid", requestData.serverid);
     formData.append("ssid", requestData.ssid);
     formData.append("username", requestData.username);
     formData.append("sni", requestData.sni);
-    formData.append("protocol", requestData.protocol); // 🚀 Pastikan ini mengambil nilai dari pengguna
-    formData.append("type", requestData.type); // 🚀 Gunakan nilai yang dipilih pengguna
+    formData.append("protocol", requestData.protocol); // Ambil dari pengguna
+    formData.append("type", requestData.type); // Ambil dari pengguna
     formData.append("security", requestData.security);
     formData.append("encryption", "none"); // Wajib untuk VLESS
-    formData.append("path", "/your-path"); // Contoh: "/vless-ws"
+    formData.append("path", "/your-path"); // Pastikan path sesuai
     formData.append("captcha", requestData.captcha);
+
+    console.log("📤 Payload yang dikirim:", Object.fromEntries(formData));
 
     try {
         const proxyUrl = "https://corsmirror.com/v1?url=";
         const targetUrl = "https://www.fastssh.com/page/create-obfs-process";
-
-        console.log("📤 Payload yang dikirim:", Object.fromEntries(formData));
 
         const response = await fetch(proxyUrl + encodeURIComponent(targetUrl), {
             method: "POST",
@@ -72,7 +68,6 @@ async function sendRequest(requestData) {
         const text = await response.text();
         console.log("✅ Raw Response:", text);
 
-        // Periksa apakah respons meminta CAPTCHA ulang
         if (text.includes("Wrong Captcha")) {
             alert("❌ ERROR: CAPTCHA tidak valid. Harap selesaikan ulang!");
             grecaptcha.reset();
