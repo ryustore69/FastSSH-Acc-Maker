@@ -1,17 +1,21 @@
 document.addEventListener("DOMContentLoaded", function () {
-    // Pastikan tombol ada sebelum menambahkan event listener
     const submitBtn = document.getElementById("submitBtn");
+
     if (!submitBtn) {
         console.error("Tombol submit tidak ditemukan!");
         return;
     }
 
-    submitBtn.addEventListener("click", function () {
+    submitBtn.addEventListener("click", function (event) {
+        event.preventDefault(); // Mencegah form terkirim secara default
+
         // Ambil nilai input dari elemen HTML
         const username = document.getElementById("username")?.value.trim();
         const sni = document.getElementById("sni")?.value.trim();
-        const protocol = document.getElementById("protocol")?.value.trim();
-        const recaptcha = document.getElementById("recaptcha")?.value.trim();
+        const protocol = document.getElementById("protocol")?.value;
+        const recaptcha = document.getElementById("captcha")?.value; // Ambil dari input hidden
+
+        console.log("Data yang dikirim:", { username, sni, protocol, recaptcha });
 
         // Validasi input agar tidak kosong
         if (!username || !sni || !protocol || !recaptcha) {
@@ -47,14 +51,24 @@ document.addEventListener("DOMContentLoaded", function () {
         })
         .then(data => {
             console.log("Success:", data);
-            alert("Berhasil membuat akun!");
+            alert("✅ Akun berhasil dibuat!");
+
+            // Tampilkan hasil respons di dalam textarea
+            document.getElementById("responseBox").value = JSON.stringify(data, null, 2);
         })
         .catch(error => {
             console.error("Error:", error);
-            alert("Terjadi kesalahan saat mengirim data!");
+            alert("❌ Terjadi kesalahan saat mengirim data!");
         });
     });
 });
+
+// Fungsi untuk menangani reCAPTCHA
+function onCaptchaSuccess(token) {
+    console.log("Captcha sukses:", token);
+    document.getElementById("captcha").value = token; // Simpan token ke input hidden
+}
+
 
 
 // Fungsi untuk parsing akun VLESS dari respons HTML

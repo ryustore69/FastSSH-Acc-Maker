@@ -49,10 +49,11 @@
             <!-- Input Hidden untuk serverid dan ssid -->
             <input type="hidden" id="serverid" name="serverid">
             <input type="hidden" id="ssid" name="ssid">
-            <input type="hidden" id="captcha" name="captcha">
 
             <!-- reCAPTCHA -->
-            <div class="g-recaptcha" data-sitekey="6Lcvb90qAAAAAEv9mSpdybOYbTDtLIICSq5tTQex"></div>
+            <input type="hidden" id="captcha" name="captcha">
+            <div class="g-recaptcha" data-sitekey="6Lcvb90qAAAAAEv9mSpdybOYbTDtLIICSq5tTQex" data-callback="onCaptchaSuccess"></div>
+
 
             <button id="submitBtn">Kirim</button>
         </form>
