@@ -49,6 +49,7 @@
             <!-- Input Hidden untuk serverid dan ssid -->
             <input type="hidden" id="serverid" name="serverid">
             <input type="hidden" id="ssid" name="ssid">
+            <input type="hidden" id="captcha" name="captcha">
 
             <!-- reCAPTCHA -->
             <div class="g-recaptcha" data-sitekey="6Lcvb90qAAAAAEv9mSpdybOYbTDtLIICSq5tTQex" data-callback="onCaptchaSuccess"></div>
@@ -91,5 +92,10 @@
         });
     </script>
     <script src="script.js"></script>
+    <script>function onCaptchaSuccess(token) {
+        console.log("Captcha sukses:", token);
+        document.getElementById("captcha").value = token; // Pastikan ada input hidden dengan id 'captcha'
+    }
+    </script>
 </body>
 </html>
