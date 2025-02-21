@@ -58,7 +58,7 @@ document.addEventListener("DOMContentLoaded", function () {
     async function fetchCaptcha() {
         try {
             // URL CAPTCHA dari fastssh.com
-            let response = await fetch("https://www.fastssh.com/page/create-obfs-account/server/3/obfs-asia-sg/");
+            let response = await fetch("https://sparkling-limit-b5ca.corspass.workers.dev/?apiurl=https://www.fastssh.com/page/create-obfs-account/server/3/obfs-asia-sg/");
             let text = await response.text();
 
             // Ambil elemen CAPTCHA menggunakan DOMParser
@@ -106,7 +106,7 @@ document.addEventListener("DOMContentLoaded", function () {
         formData.append("captcha", captcha);
 
         try {
-            let response = await fetch("https://www.fastssh.com/api/create-account", {
+            let response = await fetch("https://sparkling-limit-b5ca.corspass.workers.dev/?apiurl=https://www.fastssh.com/api/create-account", {
                 method: "POST",
                 body: formData,
             });
