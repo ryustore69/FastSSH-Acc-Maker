@@ -41,9 +41,15 @@ document.getElementById("submitBtn").addEventListener("click", async function (e
 
         const response = await fetch(proxyUrl + encodeURIComponent(targetUrl), {
             method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "Referer": "https://www.fastssh.com/page/create-obfs", // Sesuaikan dengan halaman CAPTCHA
+                "Origin": "https://www.fastssh.com", // Tambahkan Origin
+                "User-Agent": navigator.userAgent, // Simulasikan browser asli
+            },
+            credentials: "include", // Penting untuk mengirimkan session cookie
             body: formData
-        });
+        });        
 
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
