@@ -2,8 +2,8 @@ document.addEventListener("DOMContentLoaded", function () {
     fetchServerData(); // Ambil serverid & ssid saat halaman dimuat
 });
 
-/* const proxyUrl = "https://corsmirror.com/v1?url=";
-const targetUrl = "https://www.fastssh.com/page/create-obfs-process"; */
+const proxyUrl = "https://cors.asifkamboh.com/proxy?url=";
+const targetUrl = "https://www.fastssh.com/page/create-obfs-process";
 
 document.getElementById("submitBtn").addEventListener("click", async function (event) {
     event.preventDefault();
@@ -20,7 +20,7 @@ document.getElementById("submitBtn").addEventListener("click", async function (e
         return;
     }
 
-    console.log("🔍 Data yang akan dikirim ke server:", { serverid, username, sni_bug, protocol, ssid, "g-recaptcha": captcha });
+    console.log("🔍 Data yang akan dikirim ke server:", { serverid, username, sni_bug, protocol, ssid, "captcha": captcha });
 
     const submitBtn = document.getElementById("submitBtn");
     submitBtn.disabled = true;
@@ -33,13 +33,11 @@ document.getElementById("submitBtn").addEventListener("click", async function (e
         formData.append("sni_bug", sni_bug);
         formData.append("protocol", protocol);
         formData.append("ssid", ssid);
-        formData.append("g-recaptcha", captcha);
+        formData.append("captcha", captcha);
 
         console.log("📤 Payload yang dikirim:", Object.fromEntries(formData));
 
-        /* const response = await fetch(proxyUrl + encodeURIComponent(targetUrl), { */
-        const response = await fetch("https://www.fastssh.com/page/create-obfs-process", {
-
+        const response = await fetch(proxyUrl + encodeURIComponent(targetUrl), {
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
@@ -81,14 +79,8 @@ document.getElementById("submitBtn").addEventListener("click", async function (e
 // ✅ Fungsi mengambil `serverid` dan `ssid`
 async function fetchServerData() {
     try {
-        const proxyUrl = "https://corsmirror.onrender.com/v1/cors?url=";
-        const targetUrl = "https://www.fastssh.com/page/create-obfs-account/server/3/obfs-asia-sg/";
-
-        fetch(proxyUrl + encodeURIComponent(targetUrl), { method: "GET" })
-            .then(response => response.text())
-            .then(data => console.log("✅ Data berhasil diambil:", data))
-            .catch(error => console.error("❌ Gagal mengambil data:", error));
-
+        const url = "https://www.fastssh.com/page/create-obfs-account/server/3/obfs-asia-sg/";
+        const response = await fetch(proxyUrl + encodeURIComponent(url));
 
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
