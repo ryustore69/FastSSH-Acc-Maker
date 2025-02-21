@@ -13,63 +13,57 @@ document.addEventListener("DOMContentLoaded", function () {
         const username = document.getElementById("username")?.value.trim();
         const sni = document.getElementById("sni")?.value.trim();
         const protocol = document.getElementById("protocol")?.value;
-        const recaptcha = document.getElementById("captcha")?.value; // Ambil dari input hidden
+        const captcha = document.getElementById("captcha")?.value; // Ambil dari input hidden
 
-        console.log("Data yang dikirim:", { username, sni, protocol, recaptcha });
+        console.log("Data yang dikirim:", { username, sni, protocol, captcha });
 
         // Validasi input agar tidak kosong
-        if (!username || !sni || !protocol || !recaptcha) {
-            alert("Semua kolom harus diisi!");
+        if (!username || !sni || !protocol || !captcha) {
+            alert("⚠️ Semua kolom harus diisi!");
             return;
         }
 
         // Buat body request secara dinamis berdasarkan input
-        const requestBody = {
-            username: username,
-            sni: sni,
-            protocol: protocol,
-            recaptcha: recaptcha
-        };
+        const requestBody = new URLSearchParams({
+            "serverid": "3",
+            "username": username,
+            "sni_bug": sni,
+            "protocol": protocol,
+            "ssid": "320620",
+            "captcha": captcha
+        });
 
-        // URL tujuan
-        const apiUrl = "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent("https://www.fastssh.com/page/create-obfs-process");
+        // URL tujuan dengan proxy CORS
+        const apiUrl = "https://sparkling-limit-b5ca.corspass.workers.dev/?apiurl=https://www.fastssh.com/page/create-obfs-process";
 
         // Kirim permintaan POST
         fetch(apiUrl, {
             method: "POST",
+            mode: "cors",
             headers: {
-                "Accept": "application/json",
-                "Content-Type": "application/json"
+                "Content-Type": "application/x-www-form-urlencoded"
             },
-            body: JSON.stringify(requestBody)
+            body: requestBody
         })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log("Success:", data);
-            alert("✅ Akun berhasil dibuat!");
-
-            // Tampilkan hasil respons di dalam textarea
-            document.getElementById("responseBox").value = JSON.stringify(data, null, 2);
+        .then(response => response.text()) // Karena respons adalah HTML
+        .then(responseText => {
+            console.log("Respons Mentah:", responseText);
+            
+            // Proses data akun dari respons HTML
+            processAccountData(responseText);
         })
         .catch(error => {
-            console.error("Error:", error);
-            alert("❌ Terjadi kesalahan saat mengirim data!");
+            console.error("❌ Terjadi Kesalahan:", error);
+            alert("❌ Gagal membuat akun. Coba lagi nanti!");
         });
     });
 });
 
 // Fungsi untuk menangani reCAPTCHA
 function onCaptchaSuccess(token) {
-    console.log("Captcha sukses:", token);
+    console.log("✅ Captcha sukses:", token);
     document.getElementById("captcha").value = token; // Simpan token ke input hidden
 }
-
-
 
 // Fungsi untuk parsing akun VLESS dari respons HTML
 function processAccountData(responseText) {
@@ -78,14 +72,15 @@ function processAccountData(responseText) {
     const reportDiv = doc.getElementById("report");
 
     if (!reportDiv) {
-        console.error("Elemen report tidak ditemukan dalam respons.");
+        console.error("❌ Elemen report tidak ditemukan dalam respons.");
+        alert("⚠️ Tidak ada data akun dalam respons.");
         return;
     }
 
     const accountData = {
         status: "success",
-        message: "Account has been successfully created",
-        validity: "7 days",
+        message: "✅ Akun berhasil dibuat!",
+        validity: "7 hari",
         accounts: []
     };
 
@@ -116,4 +111,6 @@ function processAccountData(responseText) {
     // Tampilkan hasil parsing di responseBox dalam format JSON yang lebih rapi
     const responseBox = document.getElementById("responseBox");
     responseBox.value = JSON.stringify(accountData, null, 2);
+
+    alert("✅ Akun berhasil dibuat! Cek hasil di response box.");
 }
