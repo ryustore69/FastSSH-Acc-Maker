@@ -50,6 +50,41 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
 });
 
+document.addEventListener("DOMContentLoaded", function () {
+    const captchaImage = document.getElementById("captchaImage");
+    const refreshBtn = document.getElementById("refreshCaptcha");
+    const captchaInput = document.getElementById("captchaInput");
+
+    async function fetchCaptcha() {
+        try {
+            let response = await fetch("https://www.fastssh.com/page/create-obfs-account/server/3/obfs-asia-sg/");
+            let text = await response.text();
+
+            // Cari URL gambar CAPTCHA dari HTML response
+            let parser = new DOMParser();
+            let doc = parser.parseFromString(text, "text/html");
+            let captchaSrc = doc.querySelector("img[src*='captcha.php']").src;
+
+            if (captchaSrc) {
+                captchaImage.src = captchaSrc; // Atur gambar CAPTCHA di halaman
+            } else {
+                console.error("Gagal mengambil URL CAPTCHA.");
+            }
+        } catch (error) {
+            console.error("Error mengambil CAPTCHA:", error);
+        }
+    }
+
+    // Muat CAPTCHA saat halaman dimuat
+    fetchCaptcha();
+
+    // Tombol untuk refresh CAPTCHA
+    refreshBtn.addEventListener("click", function () {
+        fetchCaptcha();
+    });
+});
+
+
 async function loadServerData() {
     const apiUrl = "https://sparkling-limit-b5ca.corspass.workers.dev/?apiurl=https://www.fastssh.com/page/create-obfs-account/server/3/obfs-asia-sg/";
 

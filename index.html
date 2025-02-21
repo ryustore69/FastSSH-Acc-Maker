@@ -49,8 +49,9 @@
 
             <!-- Captcha -->
             <label for="captcha">Captcha:</label>
-            <input type="text" id="captcha" name="captcha" placeholder="Masukkan captcha" required>
-            <img id="captchaImg" src="" alt="Captcha" style="display: block; margin-top: 10px;">
+            <input type="text" id="captchaInput" name="captcha" placeholder="Masukkan captcha" required autocomplete="off">
+            <img id="captchaImage" src="" alt="Captcha" style="display: block; margin-top: 10px;">
+            <button id="refreshCaptcha">Refresh Captcha</button>
 
             <button id="submitBtn">Kirim</button>
         </form>
