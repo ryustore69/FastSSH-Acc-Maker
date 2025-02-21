@@ -44,10 +44,13 @@ async function sendRequest(requestData) {
     formData.append("ssid", requestData.ssid);
     formData.append("username", requestData.username);
     formData.append("sni", requestData.sni);
-    formData.append("protocol", requestData.protocol); // "vless"
-    formData.append("type", requestData.type);         // "ws"
-    formData.append("security", requestData.security); // "tls"
+    formData.append("protocol", "vless"); // Wajib lowercase
+    formData.append("type", "ws");
+    formData.append("security", "tls");
+    formData.append("encryption", "none"); // Wajib untuk VLESS
+    formData.append("path", "/your-path"); // Contoh: "/vless-ws"
     formData.append("captcha", requestData.captcha);
+    
     try {
         const proxyUrl = "https://corsmirror.com/v1?url=";
         const targetUrl = "https://www.fastssh.com/page/create-obfs-process";
@@ -92,37 +95,33 @@ async function sendRequest(requestData) {
 
 // ✅ Fungsi parsing akun VPN dari respons HTML
 function processAccountData(responseData) {
-    const accountData = { status: "success", message: "✅ Akun berhasil dibuat", validity: "7 days", accounts: [] };
-
-    if (responseData?.report) {
-        const matches = responseData.report.match(/<textarea[^>]*>(.*?)<\/textarea>/g);
-
-        if (matches) {
-            matches.forEach(textarea => {
-                const value = textarea.replace(/<textarea[^>]*>|<\/textarea>/g, "").trim();
-                const match = value.match(
-                    /vless:\/\/([^@]+)@([^:]+):(\d+)\?.*?type=([^&]+).*?&security=([^&]+).*?#(.+)/s
-                  );
-                if (match) {
-                    accountData.accounts.push({
-                        uuid: match[1],
-                        server: match[2],
-                        port: match[3],
-                        path: decodeURIComponent(match[4]),
-                        security: match[5],
-                        encryption: match[6],
-                        type: match[7],
-                        sni: match[8] || "None",
-                        description: match[9]
-                    });
-                }
-            });
-        }
+    const textareaContent = responseData.match(/<textarea[^>]*>([\s\S]*?)<\/textarea>/i);
+    
+    if (textareaContent) {
+      const config = textareaContent[1].trim();
+      const match = config.match(
+        /^(vless|trojan|vmess):\/\/([^@]+)@([^:]+):(\d+)\?.*?(?:type=([^&]+).*?&security=([^&]+).*?|#(.+))/
+      );
+  
+      if (match) {
+        const account = {
+          protocol: match[1],
+          uuid: match[2],
+          server: match[3],
+          port: match[4],
+          type: match[5] || "ws",
+          security: match[6] || "tls",
+          remark: match[7] || "FastSSH"
+        };
+        console.log("✅ Account Created:", account);
+        document.getElementById("responseBox").value = JSON.stringify(account, null, 2);
+        return;
+      }
     }
-
-    console.log("✅ Parsed Account Data:", accountData);
-    document.getElementById("responseBox").value = JSON.stringify(accountData, null, 2);
-}
+  
+    console.error("❌ Failed to parse account data");
+    document.getElementById("responseBox").value = "Akun gagal dibuat: Format respons tidak valid";
+  }
 
 // ✅ Fungsi mengambil `serverid` dan `ssid`
 async function fetchServerData() {
