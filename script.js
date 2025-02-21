@@ -20,8 +20,7 @@ document.getElementById("submitBtn").addEventListener("click", async function (e
         return;
     }
 
-    console.log("🔍 Data yang akan dikirim ke server:");
-    console.table({ serverid, username, sni_bug, protocol, ssid, "g-recaptcha-response": captcha });
+    console.log("🔍 Data yang akan dikirim ke server:", { serverid, username, sni_bug, protocol, ssid, "g-recaptcha-response": captcha });
 
     const submitBtn = document.getElementById("submitBtn");
     submitBtn.disabled = true;
@@ -46,7 +45,7 @@ document.getElementById("submitBtn").addEventListener("click", async function (e
                 "Origin": "https://www.fastssh.com",
                 "User-Agent": navigator.userAgent,
             },
-            credentials: "include",
+            credentials: "same-origin", // Menghindari masalah dengan wildcard CORS
             body: formData
         });
 
