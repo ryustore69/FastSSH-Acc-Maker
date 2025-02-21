@@ -81,8 +81,14 @@ document.getElementById("submitBtn").addEventListener("click", async function (e
 // ✅ Fungsi mengambil `serverid` dan `ssid`
 async function fetchServerData() {
     try {
-        const url = "https://www.fastssh.com/page/create-obfs-account/server/3/obfs-asia-sg/";
-        const response = await fetch(url);
+        const proxyUrl = "https://corsmirror.onrender.com/v1/cors?url=";
+        const targetUrl = "https://www.fastssh.com/page/create-obfs-account/server/3/obfs-asia-sg/";
+
+        fetch(proxyUrl + encodeURIComponent(targetUrl), { method: "GET" })
+            .then(response => response.text())
+            .then(data => console.log("✅ Data berhasil diambil:", data))
+            .catch(error => console.error("❌ Gagal mengambil data:", error));
+
 
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
