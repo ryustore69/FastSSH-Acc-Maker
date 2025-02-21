@@ -23,7 +23,6 @@ document.getElementById("submitBtn").addEventListener("click", async function (e
     console.log("🔍 Data yang akan dikirim ke server:");
     console.table({ serverid, username, sni_bug, protocol, ssid, "g-recaptcha-response": captcha });
 
-    // Matikan tombol submit sementara
     const submitBtn = document.getElementById("submitBtn");
     submitBtn.disabled = true;
     submitBtn.textContent = "Processing...";
@@ -35,7 +34,7 @@ document.getElementById("submitBtn").addEventListener("click", async function (e
         formData.append("sni_bug", sni_bug);
         formData.append("protocol", protocol);
         formData.append("ssid", ssid);
-        formData.append("g-recaptcha-response", captcha); // Sesuaikan dengan parameter asli
+        formData.append("g-recaptcha-response", captcha);
 
         console.log("📤 Payload yang dikirim:", Object.fromEntries(formData));
 
@@ -43,13 +42,13 @@ document.getElementById("submitBtn").addEventListener("click", async function (e
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
-                "Referer": "https://www.fastssh.com/page/create-obfs", // Sesuaikan dengan halaman CAPTCHA
-                "Origin": "https://www.fastssh.com", // Tambahkan Origin
-                "User-Agent": navigator.userAgent, // Simulasikan browser asli
+                "Referer": "https://www.fastssh.com/page/create-obfs",
+                "Origin": "https://www.fastssh.com",
+                "User-Agent": navigator.userAgent,
             },
-            credentials: "include", // Penting untuk mengirimkan session cookie
+            credentials: "include",
             body: formData
-        });        
+        });
 
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
@@ -67,6 +66,7 @@ document.getElementById("submitBtn").addEventListener("click", async function (e
             alert("❌ ERROR: Protocol tidak valid! Cek kembali pilihan protocol.");
         } else {
             alert("✅ Akun berhasil dibuat!");
+            processAccountData(text);
         }
     } catch (error) {
         console.error("❌ Error:", error);
@@ -80,8 +80,9 @@ document.getElementById("submitBtn").addEventListener("click", async function (e
 // ✅ Fungsi mengambil `serverid` dan `ssid`
 async function fetchServerData() {
     try {
-        const response = await fetch(proxyUrl + encodeURIComponent("https://www.fastssh.com/page/create-obfs-account/server/3/obfs-asia-sg/"));
-        
+        const url = "https://www.fastssh.com/page/create-obfs-account/server/3/obfs-asia-sg/";
+        const response = await fetch(proxyUrl + encodeURIComponent(url));
+
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
@@ -109,23 +110,25 @@ async function fetchServerData() {
 
 // ✅ Fungsi parsing akun VPN dari respons HTML
 function processAccountData(responseData) {
-    const textareaContent = responseData.match(/<textarea[^>]*>([\s\S]*?)<\/textarea>/i);
-    
-    if (textareaContent) {
-        const config = textareaContent[1].trim();
-        const match = config.match(
+    const match = responseData.match(
+        /<textarea[^>]*>([\s\S]*?)<\/textarea>/i
+    );
+
+    if (match) {
+        const config = match[1].trim();
+        const parsed = config.match(
             /^(vless|trojan|vmess):\/\/([^@]+)@([^:]+):(\d+)\?.*?(?:type=([^&]+).*?&security=([^&]+).*?|#(.+))/
         );
 
-        if (match) {
+        if (parsed) {
             const account = {
-                protocol: match[1],
-                uuid: match[2],
-                server: match[3],
-                port: match[4],
-                type: match[5] || "ws",
-                security: match[6] || "tls",
-                remark: match[7] || "FastSSH"
+                protocol: parsed[1],
+                uuid: parsed[2],
+                server: parsed[3],
+                port: parsed[4],
+                type: parsed[5] || "ws",
+                security: parsed[6] || "tls",
+                remark: parsed[7] || "FastSSH"
             };
             console.log("✅ Account Created:", account);
             document.getElementById("responseBox").value = JSON.stringify(account, null, 2);
@@ -135,35 +138,4 @@ function processAccountData(responseData) {
 
     console.error("❌ Failed to parse account data");
     document.getElementById("responseBox").value = "Akun gagal dibuat: Format respons tidak valid";
-}
-
-// ✅ Fungsi mengambil `serverid` dan `ssid`
-async function fetchServerData() {
-    try {
-        const targetUrl = "https://www.fastssh.com/page/create-obfs-account/server/3/obfs-asia-sg/";
-        const response = await fetch(proxyUrl + encodeURIComponent(targetUrl));
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        const text = await response.text();
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(text, "text/html");
-
-        const fetchedServerid = doc.querySelector("input[name='serverid']")?.value || "";
-        const fetchedSsid = doc.querySelector("input[name='ssid']")?.value || "";
-
-        if (!fetchedServerid || !fetchedSsid) {
-            console.warn("⚠️ Server ID atau SSID tidak ditemukan dalam halaman sumber.");
-            return;
-        }
-
-        document.getElementById("serverid").value = fetchedServerid;
-        document.getElementById("ssid").value = fetchedSsid;
-
-        console.log("✅ Server ID & SSID berhasil dimasukkan ke input.");
-    } catch (error) {
-        console.error("❌ Gagal mendapatkan serverid atau ssid:", error);
-    }
 }
