@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const submitBtn = document.getElementById("submitBtn");
 
     if (!submitBtn) {
-        console.error("❌ Tombol submit tidak ditemukan!");
+        console.error("Tombol submit tidak ditemukan!");
         return;
     }
 
@@ -13,27 +13,22 @@ document.addEventListener("DOMContentLoaded", function () {
         const username = document.getElementById("username")?.value.trim();
         const sni = document.getElementById("sni")?.value.trim();
         const protocol = document.getElementById("protocol")?.value;
-        const captcha = document.getElementById("captcha")?.value; // Ambil dari input hidden
 
-        console.log("📤 Data yang dikirim:", { username, sni, protocol, captcha });
+        console.log("Data yang dikirim:", { username, sni, protocol });
 
         // Validasi input agar tidak kosong
-        if (!username || !sni || !protocol || !captcha) {
+        if (!username || !sni || !protocol) {
             alert("⚠️ Semua kolom harus diisi!");
             return;
         }
 
         try {
-            // Dapatkan serverid dan ssid secara otomatis
-            const { serverid, ssid } = await fetchServerData();
-            console.log("✅ Server ID:", serverid, "SSID:", ssid);
+            // Dapatkan serverid, ssid, dan captcha dari halaman FastSSH
+            const { serverid, ssid, captcha } = await fetchServerData();
+            console.log("Server ID:", serverid, "SSID:", ssid, "Captcha:", captcha);
 
-            // Pastikan protokol valid sebelum mengirim request
-            const validProtocols = ["VLESS-WS", "VLESS-TCP", "VLESS-H2", "VLESS-GRPC", "VMESS-WS", "VMESS-TCP", "VMESS-H2", "VMESS-GRPC", "TROJAN-WS", "TROJAN-TCP", "TROJAN-GRPC", "TROJAN-H2"];
-            if (!validProtocols.includes(protocol)) {
-                console.error("❌ Protokol tidak valid:", protocol);
-                alert("⚠️ Protokol yang dipilih tidak valid!");
-                return;
+            if (!serverid || !ssid || !captcha) {
+                throw new Error("Data serverid, ssid, atau captcha tidak ditemukan!");
             }
 
             // Buat body request secara dinamis berdasarkan input
@@ -50,62 +45,65 @@ document.addEventListener("DOMContentLoaded", function () {
             const apiUrl = "https://sparkling-limit-b5ca.corspass.workers.dev/?apiurl=https://www.fastssh.com/page/create-obfs-process";
 
             // Kirim permintaan POST
-            const response = await fetch(apiUrl, {
+            fetch(apiUrl, {
                 method: "POST",
                 mode: "cors",
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded"
                 },
                 body: requestBody
+            })
+            .then(response => response.text()) // Karena respons adalah HTML
+            .then(responseText => {
+                console.log("Respons Mentah:", responseText);
+                
+                // Proses data akun dari respons HTML
+                processAccountData(responseText);
+            })
+            .catch(error => {
+                console.error("❌ Terjadi Kesalahan:", error);
+                alert("❌ Gagal membuat akun. Coba lagi nanti!");
             });
 
-            const responseText = await response.text();
-            console.log("📥 Respons Mentah:", responseText);
-
-            // Proses data akun dari respons HTML
-            processAccountData(responseText);
         } catch (error) {
-            console.error("❌ Terjadi Kesalahan:", error);
-            alert("❌ Gagal membuat akun. Coba lagi nanti!");
+            console.error("Gagal mendapatkan serverid, ssid, atau captcha:", error);
+            alert("❌ Tidak bisa mengambil serverid, ssid, atau captcha. Coba refresh halaman.");
         }
     });
 });
 
-// Fungsi untuk menangani reCAPTCHA
-function onCaptchaSuccess(token) {
-    console.log("✅ Captcha sukses:", token);
-    document.getElementById("captcha").value = token; // Simpan token ke input hidden
-}
-
-// Fungsi untuk mengambil serverid dan ssid otomatis
+// Fungsi untuk mengambil serverid, ssid, dan captcha otomatis
 async function fetchServerData() {
-    const apiUrl = "https://sparkling-limit-b5ca.corspass.workers.dev/?apiurl=https://www.fastssh.com/page/create-obfs-process";
+    const apiUrl = "https://sparkling-limit-b5ca.corspass.workers.dev/?apiurl=https://www.fastssh.com/page/create-obfs-account/server/3/obfs-asia-sg/";
 
     try {
         const response = await fetch(apiUrl);
         const text = await response.text();
-
-        // Parsing HTML untuk menemukan serverid dan ssid
+        
+        // Parsing HTML untuk menemukan serverid, ssid, dan captcha
         const parser = new DOMParser();
         const doc = parser.parseFromString(text, "text/html");
 
-        // Coba cari elemen input hidden
+        // Cari elemen yang berisi serverid dan ssid
         const serveridInput = doc.querySelector("input[name='serverid']");
         const ssidInput = doc.querySelector("input[name='ssid']");
+        const captchaInput = doc.querySelector("input[name='captcha']");
 
-        if (serveridInput && ssidInput) {
+        if (serveridInput && ssidInput && captchaInput) {
             return {
-                serverid: serveridInput.value || "3", // Gunakan default jika kosong
-                ssid: ssidInput.value || "320620"
+                serverid: serveridInput.value,
+                ssid: ssidInput.value,
+                captcha: captchaInput.value
             };
         }
 
-        throw new Error("Elemen serverid atau ssid tidak ditemukan.");
+        throw new Error("Elemen serverid, ssid, atau captcha tidak ditemukan.");
     } catch (error) {
-        console.error("Gagal mengambil serverid dan ssid:", error);
+        console.error("Gagal mengambil serverid, ssid, dan captcha:", error);
         return {
-            serverid: "3", // Gunakan nilai default
-            ssid: "320620"
+            serverid: null,
+            ssid: null,
+            captcha: null
         };
     }
 }
@@ -151,13 +149,11 @@ function processAccountData(responseText) {
         }
     }
 
-    console.log("✅ Parsed Account Data:", accountData);
+    console.log("Parsed Account Data:", accountData);
 
     // Tampilkan hasil parsing di responseBox dalam format JSON yang lebih rapi
     const responseBox = document.getElementById("responseBox");
-    if (responseBox) {
-        responseBox.value = JSON.stringify(accountData, null, 2);
-    }
+    responseBox.value = JSON.stringify(accountData, null, 2);
 
     alert("✅ Akun berhasil dibuat! Cek hasil di response box.");
 }
