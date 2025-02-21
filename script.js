@@ -79,6 +79,7 @@ async function sendRequest(requestData) {
             return;
         }
 
+        // Coba parsing data sebagai JSON
         try {
             const result = JSON.parse(text);
             processAccountData(result);
@@ -93,6 +94,7 @@ async function sendRequest(requestData) {
         alert("Terjadi kesalahan: " + error.message);
     }
 }
+// Pastikan Anda sudah memperbarui path sesuai kebutuhan
 
 // ✅ Fungsi parsing akun VPN dari respons HTML
 function processAccountData(responseData) {
