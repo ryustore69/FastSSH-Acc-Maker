@@ -20,7 +20,7 @@ document.getElementById("submitBtn").addEventListener("click", async function (e
         return;
     }
 
-    console.log("🔍 Data yang akan dikirim ke server:", { serverid, username, sni_bug, protocol, ssid, "captcha": captcha });
+    console.log("🔍 Data yang akan dikirim ke server:", { serverid, username, sni_bug, protocol, ssid, "g-recaptcha": captcha });
 
     const submitBtn = document.getElementById("submitBtn");
     submitBtn.disabled = true;
@@ -33,7 +33,7 @@ document.getElementById("submitBtn").addEventListener("click", async function (e
         formData.append("sni_bug", sni_bug);
         formData.append("protocol", protocol);
         formData.append("ssid", ssid);
-        formData.append("captcha", captcha);
+        formData.append("g-recaptcha", captcha);
 
         console.log("📤 Payload yang dikirim:", Object.fromEntries(formData));
 
@@ -82,7 +82,7 @@ document.getElementById("submitBtn").addEventListener("click", async function (e
 async function fetchServerData() {
     try {
         const url = "https://www.fastssh.com/page/create-obfs-account/server/3/obfs-asia-sg/";
-        const response = await fetch(proxyUrl + encodeURIComponent(url));
+        const response = await fetch(url);
 
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
