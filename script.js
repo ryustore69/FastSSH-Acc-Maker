@@ -5,23 +5,37 @@ document.addEventListener("DOMContentLoaded", function () {
 const proxyUrl = "https://corsmirror.com/v1?url=";
 const targetUrl = "https://www.fastssh.com/page/create-obfs-process";
 
+// ✅ Fungsi mengirim permintaan pembuatan akun
 document.getElementById("submitBtn").addEventListener("click", async function (event) {
     event.preventDefault();
 
     const serverid = document.getElementById("serverid").value;
     const username = document.getElementById("username").value;
     const sni_bug = document.getElementById("sni").value;
-    const protocol = document.getElementById("protocol").value;
+    let protocol = document.getElementById("protocol").value.trim().toUpperCase(); // Selalu uppercase
     const ssid = document.getElementById("ssid").value;
     const captcha = grecaptcha.getResponse();
 
+    // ✅ Pastikan semua field diisi
     if (!serverid || !username || !sni_bug || !protocol || !ssid || !captcha) {
         alert("❌ Harap isi semua kolom!");
         return;
     }
 
+    // ✅ Validasi protocol
+    const validProtocols = ["VLESS-WS", "VMESS-WS", "TROJAN", "VLESS-TCP"];
+    if (!validProtocols.includes(protocol)) {
+        alert("❌ ERROR: Protocol tidak valid! Coba salah satu dari: " + validProtocols.join(", "));
+        return;
+    }
+
     console.log("🔍 Data yang akan dikirim ke server:");
     console.table({ serverid, username, sni_bug, protocol, ssid, captcha });
+
+    // ✅ Disable tombol untuk mencegah spam klik
+    const submitBtn = document.getElementById("submitBtn");
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Processing...";
 
     try {
         const response = await fetch(proxyUrl + encodeURIComponent(targetUrl), {
@@ -30,16 +44,15 @@ document.getElementById("submitBtn").addEventListener("click", async function (e
                 "Content-Type": "application/x-www-form-urlencoded",
             },
             body: new URLSearchParams({
-                serverid: serverid,
-                username: username,
-                sni_bug: sni_bug,
-                protocol: protocol,
-                ssid: ssid,
-                captcha: captcha
+                serverid, username, sni_bug, protocol, ssid, captcha
             })
         });
 
         console.log("✅ Fetch berhasil, menunggu response dari server...");
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
 
         const text = await response.text();
         console.log("✅ Response dari server:", text);
@@ -52,11 +65,15 @@ document.getElementById("submitBtn").addEventListener("click", async function (e
             alert("❌ ERROR: CAPTCHA tidak valid. Harap selesaikan ulang!");
             grecaptcha.reset();
         } else {
-            console.log("✅ Akun berhasil dibuat!");
+            alert("✅ Akun berhasil dibuat!");
         }
     } catch (error) {
         console.error("❌ Error:", error);
         alert("Terjadi kesalahan: " + error.message);
+    } finally {
+        // ✅ Re-enable tombol submit
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Buat Akun";
     }
 });
 
@@ -149,9 +166,12 @@ function processAccountData(responseData) {
 async function fetchServerData() {
     try {
         const targetUrl = "https://www.fastssh.com/page/create-obfs-account/server/3/obfs-asia-sg/";
-        const proxyUrl = "https://corsmirror.com/v1?url=";
-
         const response = await fetch(proxyUrl + encodeURIComponent(targetUrl));
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
         const text = await response.text();
         const parser = new DOMParser();
         const doc = parser.parseFromString(text, "text/html");
