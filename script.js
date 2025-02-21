@@ -13,15 +13,17 @@ document.getElementById("submitBtn").addEventListener("click", async function (e
     const sni_bug = document.getElementById("sni").value.trim();
     let protocol = document.getElementById("protocol").value.trim().toUpperCase();
     const ssid = document.getElementById("ssid").value.trim();
-    const captcha = grecaptcha.getResponse();
+    const captcha = grecaptcha.getResponse(); // Ambil CAPTCHA
 
     if (!serverid || !username || !sni_bug || !protocol || !ssid || !captcha) {
         alert("❌ Harap isi semua kolom!");
         return;
     }
 
-    console.log("🔍 Data yang akan dikirim ke server:", { serverid, username, sni_bug, protocol, ssid, captcha });
+    console.log("🔍 Data yang akan dikirim ke server:");
+    console.table({ serverid, username, sni_bug, protocol, ssid, "g-recaptcha-response": captcha });
 
+    // Matikan tombol submit sementara
     const submitBtn = document.getElementById("submitBtn");
     submitBtn.disabled = true;
     submitBtn.textContent = "Processing...";
@@ -33,7 +35,7 @@ document.getElementById("submitBtn").addEventListener("click", async function (e
         formData.append("sni_bug", sni_bug);
         formData.append("protocol", protocol);
         formData.append("ssid", ssid);
-        formData.append("captcha", captcha);
+        formData.append("g-recaptcha-response", captcha); // Sesuaikan dengan parameter asli
 
         console.log("📤 Payload yang dikirim:", Object.fromEntries(formData));
 
