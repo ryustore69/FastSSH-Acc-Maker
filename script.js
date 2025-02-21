@@ -25,6 +25,14 @@ document.getElementById("submitBtn").addEventListener("click", async function (e
         return;
     }
 
+    // **Validasi protocol dan type**: Pastikan protocol dan type valid
+    const validProtocols = ["vless", "trojan", "vmess"];
+    const validTypes = ["ws", "h2", "grpc", "tcp", "tcp-xtls"];
+    if (!validProtocols.includes(protocol) || !validTypes.includes(type)) {
+        alert("❌ Protocol atau type tidak valid!");
+        return;
+    }
+
     console.log("🟢 Semua data valid, siap dikirim:", { serverid, ssid, username, sni, protocol, type, security, captcha });
 
     // ✅ Kirim request
