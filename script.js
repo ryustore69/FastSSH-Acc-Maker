@@ -20,7 +20,7 @@ document.getElementById("submitBtn").addEventListener("click", async function (e
         return;
     }
 
-    console.log("🔍 Data yang akan dikirim ke server:", { serverid, username, sni_bug, protocol, ssid, "g-recaptcha-response": captcha });
+    console.log("🔍 Data yang akan dikirim ke server:", { serverid, username, sni_bug, protocol, ssid, "captcha": captcha });
 
     const submitBtn = document.getElementById("submitBtn");
     submitBtn.disabled = true;
@@ -33,7 +33,7 @@ document.getElementById("submitBtn").addEventListener("click", async function (e
         formData.append("sni_bug", sni_bug);
         formData.append("protocol", protocol);
         formData.append("ssid", ssid);
-        formData.append("g-recaptcha-response", captcha);
+        formData.append("captcha", captcha);
 
         console.log("📤 Payload yang dikirim:", Object.fromEntries(formData));
 
