@@ -2,9 +2,8 @@ document.addEventListener("DOMContentLoaded", function () {
     fetchServerData(); // Ambil serverid & ssid saat halaman dimuat
 });
 
-const apiKey = "5b5151a1c9a6b74d393739014785a406"; // Ganti dengan API Key Anda
+const proxyUrl = "https://bypass-cors.vercel.app/?url=";
 const targetUrl = "https://www.fastssh.com/page/create-obfs-process";
-const proxyUrl = `http://api.scraperapi.com?api_key=${apiKey}&url=`;
 
 document.getElementById("submitBtn").addEventListener("click", async function (event) {
     event.preventDefault();
