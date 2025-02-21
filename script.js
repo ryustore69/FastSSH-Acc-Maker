@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", function () {
         };
 
         // URL tujuan
-        const apiUrl = "https://bypass-cors.vercel.app/?url=" + encodeURIComponent("https://www.fastssh.com/page/create-obfs-process");
+        const apiUrl = "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent("https://www.fastssh.com/page/create-obfs-process");
 
         // Kirim permintaan POST
         fetch(apiUrl, {
