@@ -111,6 +111,14 @@ async function sendRequest(requestData) {
         const text = await response.text();
         console.log("✅ Raw Response:", text);
 
+        const captcha = grecaptcha.getResponse();
+        if (!captcha) {
+            console.error("❌ CAPTCHA belum diisi atau tidak valid.");
+            alert("❌ Harap selesaikan CAPTCHA sebelum mengirimkan formulir.");
+            return;
+        }
+        console.log("✅ CAPTCHA:", captcha);
+
         if (text.includes("Wrong Captcha")) {
             alert("❌ ERROR: CAPTCHA tidak valid. Harap selesaikan ulang!");
             grecaptcha.reset();
