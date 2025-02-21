@@ -1,3 +1,57 @@
+document.addEventListener("DOMContentLoaded", function () {
+    const submitBtn = document.getElementById("submitBtn");
+
+    submitBtn.addEventListener("click", async function (event) {
+        event.preventDefault();
+
+        const username = document.getElementById("username").value.trim();
+        const sni = document.getElementById("sni").value.trim();
+        const protocol = document.getElementById("protocol").value;
+        const captcha = document.getElementById("captcha").value;
+
+        if (!username || !sni || !protocol || !captcha) {
+            alert("⚠️ Semua kolom harus diisi!");
+            return;
+        }
+
+        try {
+            const { serverid, ssid } = await fetchServerData();
+            console.log("🔹 Server ID:", serverid, "SSID:", ssid);
+
+            if (!serverid || !ssid) {
+                throw new Error("Server ID atau SSID tidak ditemukan!");
+            }
+
+            const requestBody = new URLSearchParams({
+                "serverid": serverid,
+                "username": username,
+                "sni_bug": sni,
+                "protocol": protocol,
+                "ssid": ssid,
+                "captcha": captcha
+            });
+
+            const apiUrl = "https://sparkling-limit-b5ca.corspass.workers.dev/?apiurl=https://www.fastssh.com/page/create-obfs-process";
+
+            const response = await fetch(apiUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: requestBody
+            });
+
+            const responseText = await response.text();
+            console.log("✅ Respons Server:", responseText);
+            document.getElementById("responseBox").value = responseText;
+
+        } catch (error) {
+            console.error("❌ Error:", error);
+            alert("Gagal membuat akun. Silakan coba lagi.");
+        }
+    });
+});
+
 document.addEventListener("DOMContentLoaded", async function () {
     const submitBtn = document.getElementById("submitBtn");
 
@@ -46,75 +100,6 @@ document.addEventListener("DOMContentLoaded", async function () {
         } catch (error) {
             console.error("❌ Error:", error);
             alert("Gagal membuat akun. Silakan coba lagi.");
-        }
-    });
-});
-
-document.addEventListener("DOMContentLoaded", function () {
-    const captchaImg = document.getElementById("captcha-image");
-    const refreshCaptchaBtn = document.getElementById("refresh-captcha");
-    const captchaInput = document.getElementById("captcha-input");
-
-    async function fetchCaptcha() {
-        try {
-            // URL CAPTCHA dari fastssh.com
-            let response = await fetch("https://sparkling-limit-b5ca.corspass.workers.dev/?apiurl=https://www.fastssh.com/page/create-obfs-account/server/3/obfs-asia-sg/");
-            let text = await response.text();
-
-            // Ambil elemen CAPTCHA menggunakan DOMParser
-            let parser = new DOMParser();
-            let doc = parser.parseFromString(text, "text/html");
-            let captchaElement = doc.querySelector(".g-recaptcha iframe");
-
-            if (captchaElement) {
-                let captchaSrc = captchaElement.src;
-                captchaImg.src = captchaSrc;
-                console.log("Captcha berhasil dimuat:", captchaSrc);
-            } else {
-                console.error("Gagal menemukan CAPTCHA.");
-            }
-        } catch (error) {
-            console.error("Error mengambil CAPTCHA:", error);
-        }
-    }
-
-    // Muat CAPTCHA saat halaman dimuat
-    fetchCaptcha();
-
-    // Tombol refresh untuk memuat ulang CAPTCHA
-    refreshCaptchaBtn.addEventListener("click", function () {
-        fetchCaptcha();
-    });
-
-    document.getElementById("vpnForm").addEventListener("submit", async function (event) {
-        event.preventDefault();
-
-        const username = document.getElementById("username").value;
-        const sni = document.getElementById("sni").value;
-        const protocol = document.getElementById("protocol").value;
-        const captcha = captchaInput.value;
-
-        if (!captcha) {
-            alert("Silakan masukkan CAPTCHA terlebih dahulu.");
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append("username", username);
-        formData.append("sni", sni);
-        formData.append("protocol", protocol);
-        formData.append("captcha", captcha);
-
-        try {
-            let response = await fetch("https://sparkling-limit-b5ca.corspass.workers.dev/?apiurl=https://www.fastssh.com/api/create-account", {
-                method: "POST",
-                body: formData,
-            });
-
-            let result = await response.text();
-            document.getElementById("responseBox").value = result;
-        } catch (error) {
-            console.error("Gagal mengirim permintaan:", error);
         }
     });
 });
