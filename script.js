@@ -46,19 +46,18 @@ async function sendRequest(requestData) {
     formData.append("ssid", requestData.ssid);
     formData.append("username", requestData.username);
     formData.append("sni", requestData.sni);
-    formData.append("protocol", requestData.protocol);
-    formData.append("type", requestData.type);
+    formData.append("protocol", requestData.protocol); // 🚀 Pastikan ini mengambil nilai dari pengguna
+    formData.append("type", requestData.type); // 🚀 Gunakan nilai yang dipilih pengguna
     formData.append("security", requestData.security);
     formData.append("encryption", "none"); // Wajib untuk VLESS
-    formData.append("path", "/your-path"); // Pastikan ini benar
+    formData.append("path", "/your-path"); // Contoh: "/vless-ws"
     formData.append("captcha", requestData.captcha);
-
-    // Log data yang akan dikirim
-    console.log("🟢 Data yang akan dikirim:", Array.from(formData.entries()));
 
     try {
         const proxyUrl = "https://corsmirror.com/v1?url=";
         const targetUrl = "https://www.fastssh.com/page/create-obfs-process";
+
+        console.log("📤 Payload yang dikirim:", Object.fromEntries(formData));
 
         const response = await fetch(proxyUrl + encodeURIComponent(targetUrl), {
             method: "POST",
@@ -73,13 +72,13 @@ async function sendRequest(requestData) {
         const text = await response.text();
         console.log("✅ Raw Response:", text);
 
+        // Periksa apakah respons meminta CAPTCHA ulang
         if (text.includes("Wrong Captcha")) {
             alert("❌ ERROR: CAPTCHA tidak valid. Harap selesaikan ulang!");
             grecaptcha.reset();
             return;
         }
 
-        // Coba parsing data sebagai JSON
         try {
             const result = JSON.parse(text);
             processAccountData(result);
@@ -94,7 +93,6 @@ async function sendRequest(requestData) {
         alert("Terjadi kesalahan: " + error.message);
     }
 }
-// Pastikan Anda sudah memperbarui path sesuai kebutuhan
 
 // ✅ Fungsi parsing akun VPN dari respons HTML
 function processAccountData(responseData) {
