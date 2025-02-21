@@ -50,8 +50,11 @@ async function sendRequest(requestData) {
     formData.append("type", requestData.type);
     formData.append("security", requestData.security);
     formData.append("encryption", "none"); // Wajib untuk VLESS
-    formData.append("path", "/your-path"); // Contoh: "/vless-ws"
+    formData.append("path", "/your-path"); // Pastikan ini benar
     formData.append("captcha", requestData.captcha);
+
+    // Log data yang akan dikirim
+    console.log("🟢 Data yang akan dikirim:", Array.from(formData.entries()));
 
     try {
         const proxyUrl = "https://corsmirror.com/v1?url=";
@@ -70,7 +73,6 @@ async function sendRequest(requestData) {
         const text = await response.text();
         console.log("✅ Raw Response:", text);
 
-        // Periksa apakah respons meminta CAPTCHA ulang
         if (text.includes("Wrong Captcha")) {
             alert("❌ ERROR: CAPTCHA tidak valid. Harap selesaikan ulang!");
             grecaptcha.reset();
