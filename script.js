@@ -2,10 +2,12 @@ document.addEventListener("DOMContentLoaded", function () {
     fetchServerData(); // Ambil serverid & ssid saat halaman dimuat
 });
 
+const proxyUrl = "https://corsmirror.com/v1?url=";
+const targetUrl = "https://www.fastssh.com/page/create-obfs-process";
+
 document.getElementById("submitBtn").addEventListener("click", async function (event) {
     event.preventDefault();
 
-    // Ambil nilai dari input form
     const serverid = document.getElementById("serverid").value;
     const username = document.getElementById("username").value;
     const sni_bug = document.getElementById("sni").value;
@@ -13,18 +15,16 @@ document.getElementById("submitBtn").addEventListener("click", async function (e
     const ssid = document.getElementById("ssid").value;
     const captcha = grecaptcha.getResponse();
 
-    // Validasi input sebelum mengirim
     if (!serverid || !username || !sni_bug || !protocol || !ssid || !captcha) {
         alert("❌ Harap isi semua kolom!");
         return;
     }
 
-    // Log untuk memastikan data yang dikirim sudah benar
     console.log("🔍 Data yang akan dikirim ke server:");
     console.table({ serverid, username, sni_bug, protocol, ssid, captcha });
 
     try {
-        const response = await fetch("/proxy", {
+        const response = await fetch(proxyUrl + encodeURIComponent(targetUrl), {
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
@@ -39,17 +39,15 @@ document.getElementById("submitBtn").addEventListener("click", async function (e
             })
         });
 
-        // Log untuk melihat apakah fetch berhasil
         console.log("✅ Fetch berhasil, menunggu response dari server...");
 
         const text = await response.text();
-        console.log("✅ Response dari server:", text); // Log response dari server
+        console.log("✅ Response dari server:", text);
 
         document.getElementById("responseBox").value = text;
 
-        // Cek apakah ada error dari server
         if (text.includes("Please choose a correct protocol")) {
-            alert("❌ ERROR: Format protocol tidak valid! Cek kembali pilihan protocol.");
+            alert("❌ ERROR: Protocol tidak valid! Cek kembali pilihan protocol.");
         } else if (text.includes("Wrong Captcha")) {
             alert("❌ ERROR: CAPTCHA tidak valid. Harap selesaikan ulang!");
             grecaptcha.reset();
