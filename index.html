@@ -47,11 +47,14 @@
             <input type="hidden" id="serverid" name="serverid">
             <input type="hidden" id="ssid" name="ssid">
 
-            <!-- Captcha -->
-            <label for="captcha">Captcha:</label>
-            <input type="text" id="captchaInput" name="captcha" placeholder="Masukkan captcha" required autocomplete="off">
-            <img id="captchaImage" src="" alt="Captcha" style="display: block; margin-top: 10px;">
-            <button id="refreshCaptcha">Refresh Captcha</button>
+            <!-- Tempat untuk reCAPTCHA -->
+            <div id="captcha-container">
+                <div class="g-recaptcha" 
+                    data-sitekey="6LcpDQ8UAAAAAGcJOV1eC9WuOM6meGgn5-rVINkC" 
+                    data-callback="onCaptchaSuccess">
+                </div>
+            </div>
+            <input type="hidden" id="g-recaptcha-response" name="g-recaptcha-response">
 
             <button id="submitBtn">Kirim</button>
         </form>

@@ -51,24 +51,27 @@ document.addEventListener("DOMContentLoaded", async function () {
 });
 
 document.addEventListener("DOMContentLoaded", function () {
-    const captchaImage = document.getElementById("captchaImage");
-    const refreshBtn = document.getElementById("refreshCaptcha");
-    const captchaInput = document.getElementById("captchaInput");
+    const captchaImg = document.getElementById("captcha-image");
+    const refreshCaptchaBtn = document.getElementById("refresh-captcha");
+    const captchaInput = document.getElementById("captcha-input");
 
     async function fetchCaptcha() {
         try {
+            // URL CAPTCHA dari fastssh.com
             let response = await fetch("https://www.fastssh.com/page/create-obfs-account/server/3/obfs-asia-sg/");
             let text = await response.text();
 
-            // Cari URL gambar CAPTCHA dari HTML response
+            // Ambil elemen CAPTCHA menggunakan DOMParser
             let parser = new DOMParser();
             let doc = parser.parseFromString(text, "text/html");
-            let captchaSrc = doc.querySelector("img[src*='captcha.php']").src;
+            let captchaElement = doc.querySelector(".g-recaptcha iframe");
 
-            if (captchaSrc) {
-                captchaImage.src = captchaSrc; // Atur gambar CAPTCHA di halaman
+            if (captchaElement) {
+                let captchaSrc = captchaElement.src;
+                captchaImg.src = captchaSrc;
+                console.log("Captcha berhasil dimuat:", captchaSrc);
             } else {
-                console.error("Gagal mengambil URL CAPTCHA.");
+                console.error("Gagal menemukan CAPTCHA.");
             }
         } catch (error) {
             console.error("Error mengambil CAPTCHA:", error);
@@ -78,12 +81,43 @@ document.addEventListener("DOMContentLoaded", function () {
     // Muat CAPTCHA saat halaman dimuat
     fetchCaptcha();
 
-    // Tombol untuk refresh CAPTCHA
-    refreshBtn.addEventListener("click", function () {
+    // Tombol refresh untuk memuat ulang CAPTCHA
+    refreshCaptchaBtn.addEventListener("click", function () {
         fetchCaptcha();
     });
-});
 
+    document.getElementById("vpnForm").addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        const username = document.getElementById("username").value;
+        const sni = document.getElementById("sni").value;
+        const protocol = document.getElementById("protocol").value;
+        const captcha = captchaInput.value;
+
+        if (!captcha) {
+            alert("Silakan masukkan CAPTCHA terlebih dahulu.");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("username", username);
+        formData.append("sni", sni);
+        formData.append("protocol", protocol);
+        formData.append("captcha", captcha);
+
+        try {
+            let response = await fetch("https://www.fastssh.com/api/create-account", {
+                method: "POST",
+                body: formData,
+            });
+
+            let result = await response.text();
+            document.getElementById("responseBox").value = result;
+        } catch (error) {
+            console.error("Gagal mengirim permintaan:", error);
+        }
+    });
+});
 
 async function loadServerData() {
     const apiUrl = "https://sparkling-limit-b5ca.corspass.workers.dev/?apiurl=https://www.fastssh.com/page/create-obfs-account/server/3/obfs-asia-sg/";
