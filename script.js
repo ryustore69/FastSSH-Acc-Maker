@@ -1,20 +1,24 @@
-document.addEventListener("DOMContentLoaded", async function () {
-    console.log("🚀 Script Loaded");
+document.getElementById("submitBtn").addEventListener("click", async function (event) {
+    event.preventDefault();
 
-    // 🔹 Ambil serverid & ssid saat halaman dimuat
-    await fetchServerData();
+    // Ambil nilai dari dropdown
+    const protocolFull = document.getElementById("protocol").value; // Contoh: "VLESS-WS"
+    const [protocol, type] = protocolFull.toLowerCase().split("-"); // ["vless", "ws"]
 
-    document.getElementById("submitBtn").addEventListener("click", async function (event) {
-        event.preventDefault(); // Mencegah refresh halaman
+    // Tentukan parameter security
+    const security = type === "h2" || type === "grpc" || type === "tcp-xtls" ? "tls" : "none";
 
-        // ✅ Ambil elemen input
-        const serverid = document.getElementById("serverid")?.value.trim();
-        const ssid = document.getElementById("ssid")?.value.trim();
-        const username = document.getElementById("username")?.value.trim();
-        const sni = document.getElementById("sni")?.value.trim();
-        const protocol = document.getElementById("protocol")?.value;
-        const responseBox = document.getElementById("responseBox");
-        const captcha = grecaptcha.getResponse();
+    // Kirim parameter terpisah ke server
+    await sendRequest({
+        serverid: document.getElementById("serverid").value,
+        ssid: document.getElementById("ssid").value,
+        username: document.getElementById("username").value,
+        sni: document.getElementById("sni").value,
+        protocol: protocol, // "vless"
+        type: type,         // "ws"
+        security: security, // "tls" atau "none"
+        captcha: grecaptcha.getResponse()
+        }).then(async function () {
 
         // ✅ Validasi input sebelum request
         if (!serverid || !ssid || !username || !sni || !protocol) {
@@ -35,6 +39,15 @@ document.addEventListener("DOMContentLoaded", async function () {
 
 // ✅ Fungsi mengirim request ke server dengan proxy
 async function sendRequest(requestData) {
+    const formData = new URLSearchParams();
+    formData.append("serverid", requestData.serverid);
+    formData.append("ssid", requestData.ssid);
+    formData.append("username", requestData.username);
+    formData.append("sni", requestData.sni);
+    formData.append("protocol", requestData.protocol); // "vless"
+    formData.append("type", requestData.type);         // "ws"
+    formData.append("security", requestData.security); // "tls"
+    formData.append("captcha", requestData.captcha);
     try {
         const proxyUrl = "https://corsmirror.com/v1?url=";
         const targetUrl = "https://www.fastssh.com/page/create-obfs-process";
@@ -87,7 +100,9 @@ function processAccountData(responseData) {
         if (matches) {
             matches.forEach(textarea => {
                 const value = textarea.replace(/<textarea[^>]*>|<\/textarea>/g, "").trim();
-                const match = value.match(/vless:\/\/([^@]+)@([^:]+):(\d+)\?path=([^&]+)&security=([^&]+)&encryption=([^&]+)&type=([^&]+)(?:&sni=([^#]+))?#(.+)/);
+                const match = value.match(
+                    /vless:\/\/([^@]+)@([^:]+):(\d+)\?.*?type=([^&]+).*?&security=([^&]+).*?#(.+)/s
+                  );
                 if (match) {
                     accountData.accounts.push({
                         uuid: match[1],
