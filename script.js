@@ -37,11 +37,11 @@ document.getElementById("submitBtn").addEventListener("click", async function (e
 
         console.log("📤 Payload yang dikirim:", Object.fromEntries(formData));
 
-        const response = await fetch(proxyUrl + encodeURIComponent(targetUrl), {
+        const response = await fetch("http://localhost:3000/proxy", {
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
-                "Referer": "https://www.fastssh.com/page/create-obfs",
+                "Referer": "https://www.fastssh.com/page/create-obfs-process",
                 "Origin": "https://www.fastssh.com",
                 "User-Agent": navigator.userAgent,
             },
