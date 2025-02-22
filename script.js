@@ -7,17 +7,16 @@ document.addEventListener("DOMContentLoaded", function () {
         const username = document.getElementById("username").value.trim();
         const sni = document.getElementById("sni").value.trim();
         const protocol = document.getElementById("protocol").value;
-        const captcha = document.getElementById("captcha").value;
 
-        if (!username || !sni || !protocol || !captcha) {
+        if (!username || !sni || !protocol) {
             alert("⚠️ Semua kolom harus diisi sebelum mengirim!");
             return;
         }
 
         try {
-            const { serverid, ssid } = await fetchServerData();
-            if (!serverid || !ssid) {
-                throw new Error("Server ID atau SSID tidak ditemukan!");
+            const { serverid, ssid, captcha } = await fetchServerDataAndCaptcha();
+            if (!serverid || !ssid || !captcha) {
+                throw new Error("Server ID, SSID, atau Captcha tidak valid!");
             }
 
             const requestBody = new URLSearchParams({
@@ -53,7 +52,10 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
-async function fetchServerData() {
+/**
+ * Fungsi untuk mengambil Server ID, SSID, dan Captcha dari halaman FastSSH
+ */
+async function fetchServerDataAndCaptcha() {
     const apiUrl = "https://sparkling-limit-b5ca.corspass.workers.dev/?apiurl=https://www.fastssh.com/page/create-obfs-account/server/3/obfs-asia-sg/";
 
     try {
@@ -65,19 +67,21 @@ async function fetchServerData() {
 
         const serveridInput = doc.querySelector("input[name='serverid']");
         const ssidInput = doc.querySelector("input[name='ssid']");
+        const captchaInput = doc.querySelector("#g-recaptcha-response");
 
-        if (serveridInput && ssidInput) {
+        if (serveridInput && ssidInput && captchaInput) {
             return {
                 serverid: serveridInput.value,
-                ssid: ssidInput.value
+                ssid: ssidInput.value,
+                captcha: captchaInput.value
             };
         }
 
-        throw new Error("Elemen serverid atau ssid tidak ditemukan!");
+        throw new Error("Elemen serverid, ssid, atau captcha tidak ditemukan!");
 
     } catch (error) {
-        console.error("❌ Gagal mengambil data server:", error);
-        return { serverid: null, ssid: null };
+        console.error("❌ Gagal mengambil data server atau captcha:", error);
+        return { serverid: null, ssid: null, captcha: null };
     }
 }
 
@@ -100,7 +104,6 @@ function processAccountData(responseText) {
         accounts: []
     };
 
-    // Ambil semua textarea yang berisi akun VLESS
     const textareas = reportDiv.getElementsByTagName("textarea");
 
     for (let textarea of textareas) {
@@ -124,7 +127,6 @@ function processAccountData(responseText) {
 
     console.log("🔹 Data Akun yang Ditemukan:", accountData);
 
-    // Tampilkan hasil parsing di responseBox dalam format JSON yang lebih rapi
     const responseBox = document.getElementById("responseBox");
     responseBox.value = JSON.stringify(accountData, null, 2);
 
