@@ -10,12 +10,14 @@ document.addEventListener("DOMContentLoaded", function () {
         const captcha = document.getElementById("captcha").value;
 
         if (!username || !sni || !protocol || !captcha) {
-            alert("⚠️ Semua kolom harus diisi sebelum mengirim!");
+            alert("⚠️ Semua kolom harus diisi!");
             return;
         }
 
         try {
             const { serverid, ssid } = await fetchServerData();
+            console.log("🔹 Server ID:", serverid, "SSID:", ssid);
+
             if (!serverid || !ssid) {
                 throw new Error("Server ID atau SSID tidak ditemukan!");
             }
@@ -31,24 +33,21 @@ document.addEventListener("DOMContentLoaded", function () {
 
             const apiUrl = "https://sparkling-limit-b5ca.corspass.workers.dev/?apiurl=https://www.fastssh.com/page/create-obfs-process";
 
-            console.log("🚀 Mengirim permintaan ke:", apiUrl);
-            console.log("📩 Payload:", Object.fromEntries(requestBody));
-
             const response = await fetch(apiUrl, {
                 method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
                 body: requestBody
             });
 
             const responseText = await response.text();
             console.log("✅ Respons Server:", responseText);
-
             document.getElementById("responseBox").value = responseText;
-            processAccountData(responseText);
 
         } catch (error) {
             console.error("❌ Error:", error);
-            alert("⚠️ Gagal membuat akun. Silakan coba lagi.");
+            alert("Gagal membuat akun. Silakan coba lagi.");
         }
     });
 });
@@ -76,19 +75,19 @@ async function fetchServerData() {
         throw new Error("Elemen serverid atau ssid tidak ditemukan!");
 
     } catch (error) {
-        console.error("❌ Gagal mengambil data server:", error);
+        console.error("Gagal mengambil data server:", error);
         return { serverid: null, ssid: null };
     }
 }
 
-// Fungsi untuk mengekstrak akun VLESS dari respons HTML
+// Fungsi untuk parsing akun VLESS dari respons HTML
 function processAccountData(responseText) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(responseText, "text/html");
     const reportDiv = doc.getElementById("report");
 
     if (!reportDiv) {
-        console.warn("⚠️ Elemen report tidak ditemukan dalam respons.");
+        console.error("❌ Elemen report tidak ditemukan dalam respons.");
         alert("⚠️ Tidak ada data akun dalam respons.");
         return;
     }
@@ -122,7 +121,7 @@ function processAccountData(responseText) {
         }
     }
 
-    console.log("🔹 Data Akun yang Ditemukan:", accountData);
+    console.log("Parsed Account Data:", accountData);
 
     // Tampilkan hasil parsing di responseBox dalam format JSON yang lebih rapi
     const responseBox = document.getElementById("responseBox");
